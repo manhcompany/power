@@ -14,7 +14,7 @@ object CanonicalStackMachine extends AbstractStackMachine with Logging {
     * @tparam T Type of elements in stack machine
     * @return Stack
     */
-  def executeBranch[T](operators: Seq[Operator[T]], stack: mutable.Stack[Option[T]], branches: Map[String, Seq[Operator[T]]]): mutable.Stack[Option[T]] = {
+  def executeBranch[T](operators: Seq[StackOperator[T]], stack: mutable.Stack[Option[T]], branches: Map[String, Seq[StackOperator[T]]]): mutable.Stack[Option[T]] = {
     assert(operators.nonEmpty, "operators should be non empty")
     assert(if (operators != null) true else false, "operators should be not null")
     operators.foldLeft(stack)((s, op) => {
@@ -40,7 +40,7 @@ object CanonicalStackMachine extends AbstractStackMachine with Logging {
     * @param branches Operators are grouped by label. Each group as a branch include branch name (label) and operators
     * @tparam T Type of elements in stack machine. Example: Int, Long, String, DataFrame
     */
-  override def execute[T](branches: Map[String, Seq[Operator[T]]]): mutable.Stack[Option[T]] = {
+  override def execute[T](branches: Map[String, Seq[StackOperator[T]]]): mutable.Stack[Option[T]] = {
     assert(branches.keySet.contains("main"), "branches should contains main")
     log.info("Start stack machine!")
     val stack = mutable.Stack[Option[T]]()
