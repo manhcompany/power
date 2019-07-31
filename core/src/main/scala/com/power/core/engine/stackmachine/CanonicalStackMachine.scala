@@ -21,9 +21,11 @@ object CanonicalStackMachine extends AbstractStackMachine with Logging {
       val operands = (1 to op.getNumberOfInputs).toList.map(_ => s.pop())
       op.execute(operands) match {
         case Right(optionDataFrames) => optionDataFrames match {
-          case Some(dfs) => if (dfs.nonEmpty) dfs.foldLeft(s)((a, e) => a.push(Some(e)))
-          else s.push(None)
-          case None => s
+          case Right(dfs) => dfs match {
+            case Some(df) => s.push(Some(df))
+            case None => s
+          }
+          case Left(_) => s.push(None)
         }
         case Left(label) => label match {
           case Some(labelStr) => executeBranch(branches(labelStr), stack, branches)
@@ -38,7 +40,7 @@ object CanonicalStackMachine extends AbstractStackMachine with Logging {
     * @param branches Operators are grouped by label. Each group as a branch include branch name (label) and operators
     * @tparam T Type of elements in stack machine. Example: Int, Long, String, DataFrame
     */
-  override def execute[T](branches: Map[String, Seq[Operator[T]]]): Unit = {
+  override def execute[T](branches: Map[String, Seq[Operator[T]]]): mutable.Stack[Option[T]] = {
     assert(branches.keySet.contains("main"), "branches should contains main")
     val stack = mutable.Stack[Option[T]]()
     executeBranch[T](branches("main"), stack, branches)

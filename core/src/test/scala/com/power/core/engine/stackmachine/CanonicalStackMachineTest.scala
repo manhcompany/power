@@ -18,7 +18,7 @@ class CanonicalStackMachineTest extends FlatSpec with BeforeAndAfterEach {
     override def getNumberOfInputs: Int = 0
 
     override val execute: ExecuteType = operands => {
-      Right(Some(List(number)))
+      Right(Right(Some(number)))
     }
   }
 
@@ -28,7 +28,7 @@ class CanonicalStackMachineTest extends FlatSpec with BeforeAndAfterEach {
     override val execute: ExecuteType = operands => {
       val a = operands.head
       val b = operands.tail.head
-      Right(Some(List[Int](a.get + b.get)))
+      Right(Right(Some(a.get + b.get)))
     }
   }
 
@@ -38,7 +38,7 @@ class CanonicalStackMachineTest extends FlatSpec with BeforeAndAfterEach {
     override val execute: ExecuteType = operands => {
       val a = operands.head
       val b = operands.tail.head
-      Right(Some(List[Int](b.get - a.get)))
+      Right(Right(Some(b.get - a.get)))
     }
   }
 
@@ -48,7 +48,7 @@ class CanonicalStackMachineTest extends FlatSpec with BeforeAndAfterEach {
     override val execute: ExecuteType = operands => {
       val a = operands.head
       println(a.get)
-      Right(None)
+      Right(Right(None))
     }
   }
 
