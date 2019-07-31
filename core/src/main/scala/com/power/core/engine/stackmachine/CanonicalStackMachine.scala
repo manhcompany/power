@@ -42,6 +42,7 @@ object CanonicalStackMachine extends AbstractStackMachine with Logging {
     */
   override def execute[T](branches: Map[String, Seq[Operator[T]]]): mutable.Stack[Option[T]] = {
     assert(branches.keySet.contains("main"), "branches should contains main")
+    log.info("Start stack machine!")
     val stack = mutable.Stack[Option[T]]()
     executeBranch[T](branches("main"), stack, branches)
   }
