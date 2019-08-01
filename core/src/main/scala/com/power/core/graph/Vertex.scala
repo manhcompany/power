@@ -6,6 +6,6 @@ class Vertex(name: String, downStreams: Seq[Vertex]) {
 
   override def equals(obj: Any): Boolean = {
     if(!obj.isInstanceOf[Vertex]) false
-    else name.equals(obj.asInstanceOf[Vertex].name)
+    else name.equals(obj.asInstanceOf[Vertex].getName)
   }
 }
