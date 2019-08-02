@@ -30,6 +30,7 @@ object Graph {
     * @return List of vertex that explore
     */
   def explore[T](vertex: Vertex[T]): List[Vertex[T]] = {
+    assert(!hasCycle(vertex), "The tree should not have cycle")
 
     def exploreRec(vertex: Vertex[T]): List[Vertex[T]] = {
       vertex::vertex.getDownStreams.foldLeft(List[Vertex[T]]())((r, v) => exploreRec(v):::r)
