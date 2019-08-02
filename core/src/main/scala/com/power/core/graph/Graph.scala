@@ -3,8 +3,8 @@ package com.power.core.graph
 
 object Graph {
 
-  def makeGraph(configurations: Seq[Configuration]): Seq[Vertex] = {
-    List[Vertex]()
+  def makeGraph[T](configurations: Seq[Configuration]): Seq[Vertex[T]] = {
+    List[Vertex[T]]()
   }
 
   /**
@@ -12,16 +12,16 @@ object Graph {
     * @param vertex root of tree
     * @return true if tree has cycle, other false
     */
-  def hasCycle(vertex: Vertex): Boolean = {
-    def checkCycleRec(vertex: Vertex, checked: List[Vertex]): List[Vertex] = {
+  def hasCycle[T](vertex: Vertex[T]): Boolean = {
+    def checkCycleRec(vertex: Vertex[T], checked: List[Vertex[T]]): List[Vertex[T]] = {
       if(checked.contains(vertex))
-        List[Vertex](vertex)
+        List[Vertex[T]](vertex)
       else {
         val newChecked = vertex::checked
         vertex.getDownStreams.flatMap(v => checkCycleRec(v, newChecked)).toList
       }
     }
-    checkCycleRec(vertex, List[Vertex]()).nonEmpty
+    checkCycleRec(vertex, List[Vertex[T]]()).nonEmpty
   }
 
   /**
@@ -29,10 +29,10 @@ object Graph {
     * @param vertex Vertex as root of tree
     * @return List of vertex that explore
     */
-  def explore(vertex: Vertex): List[Vertex] = {
+  def explore[T](vertex: Vertex[T]): List[Vertex[T]] = {
 
-    def exploreRec(vertex: Vertex): List[Vertex] = {
-      vertex::vertex.getDownStreams.foldLeft(List[Vertex]())((r, v) => exploreRec(v):::r)
+    def exploreRec(vertex: Vertex[T]): List[Vertex[T]] = {
+      vertex::vertex.getDownStreams.foldLeft(List[Vertex[T]]())((r, v) => exploreRec(v):::r)
     }
 
     exploreRec(vertex).reverse
