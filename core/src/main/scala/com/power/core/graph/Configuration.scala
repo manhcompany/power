@@ -1,3 +1,5 @@
 package com.power.core.graph
 
-class Configuration
+trait Configuration {
+  val getDownStreams: Seq[Configuration]
+}
