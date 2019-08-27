@@ -1,4 +1,4 @@
-package utils
+package com.power.spark.utils
 
 import org.scalatest.FlatSpec
 

@@ -46,6 +46,7 @@ lazy val core = (project in file("core"))
     libraryDependencies:=commonDependencies)
 
 lazy val spark = (project in file("spark"))
+  .dependsOn(core)
   .settings(
     commonSettings,
     name:="spark",

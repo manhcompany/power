@@ -1,4 +1,4 @@
-package utils
+package com.power.spark.utils
 
 case class SparkConfiguration(
                              input: Option[SourceConfiguration] = None,
