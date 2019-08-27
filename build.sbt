@@ -12,12 +12,16 @@ lazy val commonDependencies = Seq(
   "org.rogach" %% "scallop" % "3.1.5"
 )
 
+lazy val sparkDependencies = Seq(
+
+)
+
 lazy val commonSettings = Seq(
   organization := "com.power",
   version := "0.1.0-SNAPSHOT",
   scalaVersion := "2.11.12",
   test in assembly := {},
-  javaOptions ++= Seq("-Dconfig.file=etl/src/test/resources/test.conf", "-Dspark.master=local[4]", "-Ddate=20181028", "-Xms512M", "-Xmx2048M", "-XX:MaxPermSize=2048M", "-XX:+CMSClassUnloadingEnabled"),
+  javaOptions in Test ++= Seq("-Dconfig.file=spark/src/test/resources/test.conf"),
   assemblyMergeStrategy in assembly := {
     case PathList("META-INF", xs @ _*) => MergeStrategy.discard
     case x => MergeStrategy.first
@@ -41,6 +45,13 @@ lazy val core = (project in file("core"))
     name:="core",
     libraryDependencies:=commonDependencies)
 
+lazy val spark = (project in file("spark"))
+  .settings(
+    commonSettings,
+    name:="spark",
+    libraryDependencies:=(sparkDependencies++commonDependencies)
+  )
+
 lazy val root = (project in file("."))
   .settings(
     commonSettings,
@@ -48,8 +59,9 @@ lazy val root = (project in file("."))
     packageName in Universal := packageName.value + "-" + version.value,
     mappings in Universal ++= fromClasspath((managedClasspath in Runtime).value, "lib", _ => true),
     mappings in Universal ++= Seq(
-      (core / Compile / packageBin).value
+      (core / Compile / packageBin).value,
+      (spark / Compile / packageBin).value
     ).map(jar => jar -> ("lib/" + jar.getName))
   )
   .enablePlugins(UniversalPlugin)
-  .aggregate(core)
+  .aggregate(core, spark)
