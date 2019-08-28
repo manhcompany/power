@@ -1,5 +1,6 @@
 package com.power.core.graph
 
+import com.power.core.graph.mutable.Graph
 import org.scalatest.FlatSpec
 
 class GraphTest extends FlatSpec {
