@@ -1,4 +1,4 @@
-package com.power.core.configuration
+package com.power.spark.builder
 
 trait Configuration extends ImpConfiguration {
   val name: String

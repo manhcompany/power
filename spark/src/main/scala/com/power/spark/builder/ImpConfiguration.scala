@@ -1,4 +1,4 @@
-package com.power.core.configuration
+package com.power.spark.builder
 
 abstract class ImpConfiguration {
   val name: String
