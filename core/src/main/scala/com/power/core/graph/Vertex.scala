@@ -20,4 +20,6 @@ case class Vertex[T](name: String, upStreams: ListBuffer[Vertex[T]], downStreams
   def addUpStream(value: Vertex[T]): Unit = {
     if(!upStreams.contains(value)) upStreams += value
   }
+
+  override def toString: String = name
 }

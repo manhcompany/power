@@ -46,7 +46,7 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
     }
   }
 
-  def removeEdge(start: String, end: String): Unit = {
+  def removeEdge(start: String, end: String): Graph[T] = {
     vertices(start).downStreams.find(d => d.name == end) match {
       case Some(x) => vertices(start).downStreams -= x
       case None =>
@@ -56,6 +56,7 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
       case Some(x) => vertices(end).upStreams -= x
       case None =>
     }
+    this
   }
 
   def addContext(context: GraphContext[T]): Graph[T] = {
@@ -114,9 +115,9 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
     roots.foldLeft(List[Vertex[T]]())((r, root) => DFSRec(root, r).reverse)
   }
 
-
-  // TODO implement iterator for graph base on DFS
   override def iterator: Iterator[Vertex[T]] = {
     DFS().toIterator
   }
+
+
 }
