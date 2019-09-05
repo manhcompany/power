@@ -46,8 +46,6 @@ class GraphTest extends FlatSpec {
   }
 
   it should "removeEdge" in {
-
-
     val graph = Graph(configs)
     graph.build()
     graph.removeEdge("a", "b")
