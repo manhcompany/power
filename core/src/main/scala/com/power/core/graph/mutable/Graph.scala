@@ -5,7 +5,7 @@ import com.power.core.graph.{GraphContext, Vertex}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-case class Graph[T](configs: Seq[GraphContext[T]]) {
+case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
   val vertices: mutable.Map[String, Vertex[T]] = mutable.Map[String, Vertex[T]]()
 
   def getConfigs: Seq[GraphContext[T]] = configs
@@ -101,5 +101,22 @@ case class Graph[T](configs: Seq[GraphContext[T]]) {
 
   def roots: Seq[Vertex[T]] = {
     vertices.values.filter(v => v.upStreams.isEmpty).toList
+  }
+
+  def DFS(): List[Vertex[T]] = {
+    def DFSRec(vertex: Vertex[T], visited: List[Vertex[T]]): List[Vertex[T]] = {
+      if(visited.contains(vertex))
+        visited
+      else {
+        vertex.downStreams.filterNot(p => visited.contains(p)).foldLeft(vertex :: visited)((r, x) => DFSRec(x, r))
+      }
+    }
+    roots.foldLeft(List[Vertex[T]]())((r, root) => DFSRec(root, r).reverse)
+  }
+
+
+  // TODO implement iterator for graph base on DFS
+  override def iterator: Iterator[Vertex[T]] = {
+    DFS().toIterator
   }
 }
