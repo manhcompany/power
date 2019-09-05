@@ -114,4 +114,11 @@ class GraphTest extends FlatSpec {
 
     assert(graph.toPNOrder.map(v => v.name).equals(List("e", "f", "b", "d", "a", "e", "f", "b", "c")))
   }
+
+  it should "DFS" in {
+    val graph = Graph(configs)
+    graph.build()
+    assert(graph.DFS().size == 3)
+    assert(graph.DFS().map(x => x.name).equals(List("b", "a", "c")))
+  }
 }
