@@ -25,6 +25,8 @@ class TypeClassTest extends FlatSpec {
 
   implicit val doubleCanShow: Show[Double] = db => s"double $db"
 
+  implicit val seqCanShow: Show[List[Int]] = sq => s"len ${sq.length}"
+
   case class Foo(foo: Int)
 
   implicit val fooShow: Show[Foo] = foo => s"case class Foo(foo: ${foo.foo})"
@@ -38,5 +40,6 @@ class TypeClassTest extends FlatSpec {
     println("hello" show)
     println(0.001 show)
     println(Foo(40) show)
+    println(List(1, 2, 3) show)
   }
 }

@@ -1,8 +1,9 @@
-package com.power.core.graph
+package com.power.core.graph.mutable
+
+import com.power.core.graph.{GraphContext, Vertex}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-
 
 case class Graph[T](configs: Seq[GraphContext[T]]) {
   val vertices: mutable.Map[String, Vertex[T]] = mutable.Map[String, Vertex[T]]()

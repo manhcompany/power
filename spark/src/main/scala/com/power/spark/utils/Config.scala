@@ -1,4 +1,4 @@
-package utils
+package com.power.spark.utils
 
 import com.typesafe.config.ConfigFactory
 

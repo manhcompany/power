@@ -1,5 +1,7 @@
 package com.power.core.engine.stackmachine
 
+import scala.language.implicitConversions
+
 object OperatorAdapter {
   /**
     * Convert NormalOperator to StackOperator

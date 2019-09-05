@@ -1,6 +1,7 @@
 import com.typesafe.sbt.packager.MappingsHelper.fromClasspath
 import sbt.Keys.{libraryDependencies, name}
 
+val sparkV = "2.4.3"
 
 lazy val commonDependencies = Seq(
   "com.github.pureconfig" %% "pureconfig" % "0.9.2",
@@ -13,7 +14,10 @@ lazy val commonDependencies = Seq(
 )
 
 lazy val sparkDependencies = Seq(
-
+  "org.apache.spark" %% "spark-core" % sparkV % "provided",
+  "org.apache.spark" %% "spark-sql" % sparkV % "provided",
+  "org.apache.spark" %% "spark-hive" % sparkV % "provided",
+  "org.eclipse.jetty" % "jetty-servlet" % "9.4.14.v20181114"
 )
 
 lazy val commonSettings = Seq(
@@ -46,6 +50,7 @@ lazy val core = (project in file("core"))
     libraryDependencies:=commonDependencies)
 
 lazy val spark = (project in file("spark"))
+  .dependsOn(core)
   .settings(
     commonSettings,
     name:="spark",
