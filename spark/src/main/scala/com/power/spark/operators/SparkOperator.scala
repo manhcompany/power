@@ -1,7 +1,7 @@
 package com.power.spark.operators
 
 import com.power.core.engine.stackmachine.{NormalOperator, Operator}
-import com.power.spark.utils.{Configuration, SinkConfiguration, SourceConfiguration, SparkCommon, SparkOperatorFactory}
+import com.power.spark.utils.{ActionConfiguration, Configuration, SinkConfiguration, SourceConfiguration, SparkCommon, SparkOperatorFactory}
 import org.apache.spark.sql.DataFrame
 
 import scala.util.Try
@@ -52,16 +52,19 @@ class SparkOperator extends SparkOperatorFactory {
     }
   }
 
-  case class SelectExprOperator(config: Configuration) extends NormalOperator[DataFrame] {
+  case class SelectExprOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
     override val getNumberOfInputs: Int = 1
-    override val execute: NormalOperatorType = _
+    override val execute: NormalOperatorType = operands => {
+      val df = operands.head.get
+      Some(df.selectExpr(config.select.get: _*))
+    }
   }
 
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
       case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])
       case "OUTPUT" => OutputOperator(config.asInstanceOf[SinkConfiguration])
-      case "SELECT" => SelectExprOperator(config)
+      case "SELECT" => SelectExprOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
