@@ -2,6 +2,7 @@ package com.power.spark.utils
 
 trait Configuration {
   def getUpStreams: Seq[String] = Seq[String]()
+  def getOperatorName: String = "Empty"
 }
 
 case class SparkConfiguration(
@@ -53,6 +54,8 @@ case class ActionConfiguration(
       case None => Seq[String]()
     }
   }
+
+  override def getOperatorName: String = operator
 }
 
 case class Opt(key: String, value: String)

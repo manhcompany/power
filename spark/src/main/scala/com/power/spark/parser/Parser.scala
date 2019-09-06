@@ -35,13 +35,16 @@ object Parser {
         } :: rrr)
       })
     })
-
     val removedEdges = sinkConfigurations.foldLeft(List[(String, String)]())((r, v) => r ::: {
       v.upStreams.foldLeft(List[(String, String)]())((rr, u) => (u.name, v.name) :: rr)
     })
-
     addedContext.foreach(x => graph.addEdge(x._1, x._2))
     removedEdges.foreach(x => graph.removeEdge(x._1, x._2))
+
     graph
+  }
+
+  def toPN(graph: Graph[Configuration]): Seq[Configuration] = {
+    graph.toPNOrder.map(_.payLoad)
   }
 }

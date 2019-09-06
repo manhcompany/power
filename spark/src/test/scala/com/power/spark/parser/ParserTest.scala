@@ -16,10 +16,15 @@ class ParserTest extends FlatSpec {
     assert(graph.vertices("datasetA-1").downStreams.map(_.name).contains("datasetB-0"))
     assert(!graph.vertices("datasetA-1").downStreams.map(_.name).contains("datasetB-1"))
     assert(graph.vertices("datasetB-1").downStreams.map(_.name).contains("datasetB-0"))
-//    assert(graph.roots.head.payLoad.isInstanceOf[SinkConfiguration])
-//    assert(!graph.hasCycle)
-//    assert(graph.toPNOrder.size == 5)
-//    assert(graph.toPNOrder.reverse.head.payLoad.isInstanceOf[SinkConfiguration])
-//    assert(graph.toPNOrder.head.payLoad.isInstanceOf[SourceConfiguration])
+  }
+
+  it should "toPN" in {
+    val a = Config.loadConfig("etl")
+    assert(a.isInstanceOf[Map[String, SparkConfiguration]])
+    val graph = Parser.buildGraph(a)
+    val PNOrder = Parser.toPN(graph)
+    assert(PNOrder.size == 6)
+    assert(PNOrder.reverse.head.isInstanceOf[SinkConfiguration])
+    assert(PNOrder.head.isInstanceOf[SourceConfiguration])
   }
 }
