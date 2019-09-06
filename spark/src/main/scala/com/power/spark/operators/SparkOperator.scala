@@ -1,10 +1,12 @@
 package com.power.spark.operators
 
 import com.power.core.engine.stackmachine.{NormalOperator, Operator}
-import com.power.spark.utils.{ActionConfiguration, Configuration, SinkConfiguration, SourceConfiguration, SparkCommon, SparkOperatorFactory}
+import com.power.spark.utils._
 import org.apache.spark.sql.DataFrame
 
 import scala.util.Try
+
+
 
 class SparkOperator extends SparkOperatorFactory {
   case class InputOperator(config: SourceConfiguration) extends NormalOperator[DataFrame] {
