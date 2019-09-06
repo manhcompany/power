@@ -33,4 +33,19 @@ object OperatorAdapter {
       }
     }
   }
+
+  implicit def operator2stack[T](operator: Operator[T]): StackOperator[T] = {
+    new StackOperator[T] {
+      override val getNumberOfInputs: Int = operator.getNumberOfInputs
+      override val execute: this.ExecuteType = operands => {
+        operator match {
+          case value: NormalOperator[T] =>
+            val result = value.execute(operands)
+            Right(Right(result))
+          case value: BranchingOperator[T] =>
+            value.execute(operands)
+        }
+      }
+    }
+  }
 }

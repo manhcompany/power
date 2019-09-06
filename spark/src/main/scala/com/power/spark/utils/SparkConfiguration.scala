@@ -2,12 +2,14 @@ package com.power.spark.utils
 
 trait Configuration {
   def getUpStreams: Seq[String] = Seq[String]()
+
+  def getOperatorName: String = "Empty"
 }
 
 case class SparkConfiguration(
-                             input: Option[SourceConfiguration] = None,
-                             actions: Seq[ActionConfiguration] = Seq.empty,
-                             output: Option[SinkConfiguration] = None
+                               input: Option[SourceConfiguration] = None,
+                               actions: Seq[ActionConfiguration] = Seq.empty,
+                               output: Option[SinkConfiguration] = None
                              ) {
   val size: Int = {
     actions.size + (input match {
@@ -22,7 +24,9 @@ case class SparkConfiguration(
   val tail: Configuration = {
     output match {
       case Some(x) => x
-      case None => if(actions.nonEmpty) { actions.reverse.head } else input.get
+      case None => if (actions.nonEmpty) {
+        actions.reverse.head
+      } else input.get
     }
   }
 
@@ -38,14 +42,24 @@ case class SparkConfiguration(
   }
 }
 
-case class SourceConfiguration(path: Option[String], format: Option[String], options: Option[Seq[Opt]]) extends Configuration
+case class SourceConfiguration(path: Option[String], format: Option[String], options: Option[Seq[Opt]]) extends Configuration {
+  override def getOperatorName: String = "INPUT"
+}
 
-case class SinkConfiguration(path: Option[String], format: Option[String], options: Option[Seq[Opt]], mode: Option[String]) extends Configuration
+case class SinkConfiguration(
+                              path: Option[String],
+                              format: Option[String],
+                              options: Option[Seq[Opt]],
+                              mode: Option[String],
+                              partitionBy: Option[List[String]]
+                            ) extends Configuration {
+  override def getOperatorName: String = "OUTPUT"
+}
 
 case class ActionConfiguration(
-                              operator: String,
-                              options: Option[Seq[Opt]],
-                              select: Option[Seq[String]]
+                                operator: String,
+                                options: Option[Seq[Opt]],
+                                select: Option[Seq[String]]
                               ) extends Configuration {
   override def getUpStreams: Seq[String] = {
     options match {
@@ -53,6 +67,8 @@ case class ActionConfiguration(
       case None => Seq[String]()
     }
   }
+
+  override def getOperatorName: String = operator
 }
 
 case class Opt(key: String, value: String)

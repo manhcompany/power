@@ -59,6 +59,7 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
     this
   }
 
+  // TODO need more test cases
   def addContext(context: GraphContext[T]): Graph[T] = {
     vertices += (context.name -> Vertex[T](context.name, ListBuffer[Vertex[T]](), ListBuffer[Vertex[T]](), context.payLoad))
     context.downStreams.foreach(d => {
@@ -118,6 +119,4 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
   override def iterator: Iterator[Vertex[T]] = {
     DFS().toIterator
   }
-
-
 }
