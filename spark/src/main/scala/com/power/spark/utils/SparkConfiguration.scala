@@ -39,9 +39,13 @@ case class SparkConfiguration(
   }
 }
 
-case class SourceConfiguration(path: Option[String], format: Option[String], options: Option[Seq[Opt]]) extends Configuration
+case class SourceConfiguration(path: Option[String], format: Option[String], options: Option[Seq[Opt]]) extends Configuration {
+  override def getOperatorName: String = "INPUT"
+}
 
-case class SinkConfiguration(path: Option[String], format: Option[String], options: Option[Seq[Opt]], mode: Option[String]) extends Configuration
+case class SinkConfiguration(path: Option[String], format: Option[String], options: Option[Seq[Opt]], mode: Option[String]) extends Configuration {
+  override def getOperatorName: String = "OUTPUT"
+}
 
 case class ActionConfiguration(
                               operator: String,
