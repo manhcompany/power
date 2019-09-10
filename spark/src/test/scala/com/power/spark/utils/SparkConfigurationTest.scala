@@ -12,7 +12,7 @@ class SparkConfigurationTest extends FlatSpec {
   it should "size" in {
     val a = Config.loadConfig("etl")
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
-    assert(a("datasetA").size == 3)
+    assert(a("datasetA").size == 5)
     assert(a("datasetB").size == 2)
     assert(a("datasetA").tail.isInstanceOf[SinkConfiguration])
   }
@@ -27,7 +27,7 @@ class SparkConfigurationTest extends FlatSpec {
     val a = Config.loadConfig("etl")
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     assert(a("datasetA").toList.head._1 == "0")
-    assert(a("datasetA").toList.size == 3)
+    assert(a("datasetA").toList.size == 5)
     assert(a("datasetA").toList.head._2.isInstanceOf[SourceConfiguration])
     assert(a("datasetA").toList.reverse.head._2.isInstanceOf[SinkConfiguration])
   }
