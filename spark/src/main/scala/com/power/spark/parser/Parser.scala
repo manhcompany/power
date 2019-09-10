@@ -26,22 +26,7 @@ object Parser {
     graph.build()
 
     val sinkConfigurations = graph.filter(v => v.payLoad.isInstanceOf[SinkConfiguration])
-
-    // TODO refactor - move to Graph class
-    val addedContext = sinkConfigurations.foldLeft(List[(String, String)]())((r, v) => r ::: {
-      v.upStreams.foldLeft(List[(String, String)]())((rr, u) => rr ::: {
-        v.downStreams.foldLeft(List[(String, String)]())((rrr, d) => {
-          (u.name, d.name)
-        } :: rrr)
-      })
-    })
-    val removedEdges = sinkConfigurations.foldLeft(List[(String, String)]())((r, v) => r ::: {
-      v.upStreams.foldLeft(List[(String, String)]())((rr, u) => (u.name, v.name) :: rr)
-    })
-    addedContext.foreach(x => graph.addEdge(x._1, x._2))
-    removedEdges.foreach(x => graph.removeEdge(x._1, x._2))
-
-    graph
+    sinkConfigurations.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
   }
 
   def toPN(graph: Graph[Configuration]): Seq[Configuration] = {

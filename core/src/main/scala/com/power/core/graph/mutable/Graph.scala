@@ -116,6 +116,18 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
     roots.foldLeft(List[Vertex[T]]())((r, root) => DFSRec(root, r).reverse)
   }
 
+  def moveNodeToRoot(node: String): Graph[T] = {
+    val addedContext = vertices(node).upStreams.foldLeft(List[(String, String)]())((r, u) => r ::: {
+      vertices(node).downStreams.foldLeft(List[(String, String)]())((rr, d) => {
+        (u.name, d.name)
+      } :: rr)
+    })
+    val removedEdges = vertices(node).upStreams.foldLeft(List[(String, String)]())((r, u) => (u.name, vertices(node).name) :: r)
+    addedContext.foreach(x => this.addEdge(x._1, x._2))
+    removedEdges.foreach(x => this.removeEdge(x._1, x._2))
+    this
+  }
+
   override def iterator: Iterator[Vertex[T]] = {
     DFS().toIterator
   }
