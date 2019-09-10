@@ -12,18 +12,18 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
 
   def getVertices: mutable.Map[String, Vertex[T]] = vertices
 
-  def build(): Unit = {
-    createVertices()
-    createEdges()
+  def build(): Graph[T] = {
+    createVertices createEdges()
   }
 
-  def createVertices(): Unit = {
+  def createVertices(): Graph[T] = {
     configs.foreach(config => {
       vertices += (config.name -> Vertex[T](config.name, ListBuffer[Vertex[T]](), ListBuffer[Vertex[T]](), config.payLoad))
     })
+    this
   }
 
-  def createEdges(): Unit = {
+  def createEdges(): Graph[T] = {
     configs.foreach(config => {
       config.downStreams.foreach(downStream => {
         vertices(config.name).addDownStream(vertices(downStream))
@@ -34,6 +34,7 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
         vertices(upStream).addDownStream(vertices(config.name))
       })
     })
+    this
   }
 
   def removeVertex(name: String): Unit = {
@@ -114,6 +115,18 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
       }
     }
     roots.foldLeft(List[Vertex[T]]())((r, root) => DFSRec(root, r).reverse)
+  }
+
+  def moveNodeToRoot(node: String): Graph[T] = {
+    val addedContext = vertices(node).upStreams.foldLeft(List[(String, String)]())((r, u) => r ::: {
+      vertices(node).downStreams.foldLeft(List[(String, String)]())((rr, d) => {
+        (u.name, d.name)
+      } :: rr)
+    })
+    val removedEdges = vertices(node).upStreams.foldLeft(List[(String, String)]())((r, u) => (u.name, vertices(node).name) :: r)
+    addedContext.foreach(x => this.addEdge(x._1, x._2))
+    removedEdges.foreach(x => this.removeEdge(x._1, x._2))
+    this
   }
 
   override def iterator: Iterator[Vertex[T]] = {

@@ -30,12 +30,4 @@ class ParserTest extends FlatSpec {
     assert(PNOrder.reverse.head.isInstanceOf[SinkConfiguration])
     assert(PNOrder.head.isInstanceOf[SourceConfiguration])
   }
-
-  it should "etl" in {
-    val config = Config.loadConfig("etl")
-    val graph = Parser.buildGraph(config)
-    val operators = graph.toPNOrder.foldLeft(Seq[Operator[DataFrame]]())((r, c) => SparkOperatorFactory.factory(c.payLoad).get +: r).reverse
-    val branches = Map[String, Seq[StackOperator[DataFrame]]](("main", operators.map(OperatorAdapter.operator2stack)))
-    CanonicalStackMachine.execute(branches)
-  }
 }

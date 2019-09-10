@@ -10,20 +10,30 @@ import scala.util.Try
 
 class SparkOperator extends SparkOperatorFactory {
   case class InputOperator(config: SourceConfiguration) extends NormalOperator[DataFrame] {
-    override val getNumberOfInputs: Int = 0
-    override val execute: NormalOperatorType = _ => {
-      val spark = SparkCommon.getSparkSession()
-      val readerFormat = config.format match {
-        case Some(f) => spark.read.format(f)
-        case None => spark.read
+    override val getNumberOfInputs: Int = {
+      config.load match {
+        case Some(_) => 1
+        case None => 0
       }
+    }
+    override val execute: NormalOperatorType = operands => {
+      config.load match {
+        case Some(x) => operands.head
+        case None => {
+          val spark = SparkCommon.getSparkSession()
+          val readerFormat = config.format match {
+            case Some(f) => spark.read.format(f)
+            case None => spark.read
+          }
 
-      val readerOptions = config.options match {
-        case Some(opt) => opt.foldLeft(readerFormat)((r, o) => r.option(o.key, o.value))
-        case None => readerFormat
+          val readerOptions = config.options match {
+            case Some(opt) => opt.foldLeft(readerFormat)((r, o) => r.option(o.key, o.value))
+            case None => readerFormat
+          }
+
+          Some(readerOptions.load(config.path.get))
+        }
       }
-
-      Some(readerOptions.load(config.path.get))
     }
   }
 

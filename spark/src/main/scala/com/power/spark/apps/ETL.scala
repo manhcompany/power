@@ -10,10 +10,17 @@ import org.apache.spark.sql.DataFrame
 
 object ETL extends Logging {
   def main(args: Array[String]): Unit = {
+    execute()
+  }
+
+  def execute(): Unit = {
     val config = Config.loadConfig("etl")
-    val graph = Parser.buildGraph(config)
-    val operators = graph.toPNOrder.foldLeft(Seq[Operator[DataFrame]]())((r, c) => SparkOperatorFactory.factory(c.payLoad).get +: r).reverse
-    val branches = Map[String, Seq[StackOperator[DataFrame]]](("main", operators.map(OperatorAdapter.operator2stack)))
+    val labels = config.groupBy(x => x._2.label)
+    val branches = labels.map(x => {
+      val graph = Parser.buildGraph(x._2)
+      val operators = graph.toPNOrder.foldLeft(Seq[Operator[DataFrame]]())((r, c) => SparkOperatorFactory.factory(c.payLoad).get +: r).reverse
+      (x._1, operators.map(OperatorAdapter.operator2stack))
+    })
     CanonicalStackMachine.execute(branches)
   }
 }
