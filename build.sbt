@@ -25,7 +25,7 @@ lazy val commonSettings = Seq(
   version := "0.1.0-SNAPSHOT",
   scalaVersion := "2.11.12",
   test in assembly := {},
-  javaOptions in Test ++= Seq("-Dconfig.file=spark/src/test/resources/conf/test.conf"),
+  javaOptions in Test ++= Seq("-Dconfig.file=spark/src/test/resources/conf/test.conf -Dspark.master=local[4]"),
   assemblyMergeStrategy in assembly := {
     case PathList("META-INF", xs @ _*) => MergeStrategy.discard
     case x => MergeStrategy.first

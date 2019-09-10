@@ -11,19 +11,23 @@ object Parser {
       configurations.reverse.tails.filter(x => x.size > 1).map(x => GraphContext(s"$prefix-${x.head._1}", List(), List(s"$prefix-${x.tail.head._1}"), x.head._2)).toList
     }
 
-    val context = sparkConfiguration.foldLeft(List[GraphContext[Configuration]]())((r, x) => {
-      val prefix = x._1
-      x._2.toList.foldLeft(r)((rr, xx) => {
-        val name = s"$prefix-${xx._1}"
-        val downStreams = xx._2.getUpStreams.map(u => s"$u-${sparkConfiguration(u).size - 1}")
-        GraphContext(name, List(), downStreams, xx._2) :: rr
-      }) ::: {
-        buildDownStreams(prefix, x._2.toList)
-      } ::: r
-    })
+    def buildGraph(sparkConfiguration: Map[String, SparkConfiguration]): Graph[Configuration] = {
+      val context = sparkConfiguration.foldLeft(List[GraphContext[Configuration]]())((r, x) => {
+        val prefix = x._1
+        x._2.toList.foldLeft(r)((rr, xx) => {
+          val name = s"$prefix-${xx._1}"
+          val downStreams = xx._2.getUpStreams.map(u => s"$u-${sparkConfiguration(u).size - 1}")
+          GraphContext(name, List(), downStreams, xx._2) :: rr
+        }) ::: {
+          buildDownStreams(prefix, x._2.toList)
+        } ::: r
+      })
 
-    val graph = Graph(context.reverse)
-    graph.build()
+      val graph = Graph(context.reverse)
+      graph.build()
+    }
+
+    val graph = buildGraph(sparkConfiguration)
 
     val sinkConfigurations = graph.filter(v => v.payLoad.isInstanceOf[SinkConfiguration])
     sinkConfigurations.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
