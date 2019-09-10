@@ -7,7 +7,7 @@ class GraphTest extends FlatSpec {
 
   behavior of "GraphTest"
 
-  val configs = List[GraphContext[Int]](
+  val configs: List[GraphContext[Int]] = List[GraphContext[Int]](
     GraphContext("a", List(), List("b"), 1),
     GraphContext("b", List("a", "c"), List(), 1),
     GraphContext("c", List(), List("b"), 1)
@@ -108,7 +108,6 @@ class GraphTest extends FlatSpec {
     assert(graph.toPNOrder.map(v => v.name).equals(List("b", "a", "b", "c")))
 
     graph.addContext(GraphContext("d", List("a"), List(), 1)).addContext(GraphContext("e", List("b"), List(), 1)).addContext(GraphContext("f", List("b"), List(), 1))
-    val a = graph.toPNOrder.map(v => v.name)
 
     assert(graph.toPNOrder.map(v => v.name).equals(List("e", "f", "b", "d", "a", "e", "f", "b", "c")))
   }
