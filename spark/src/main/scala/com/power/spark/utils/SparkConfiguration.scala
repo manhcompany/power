@@ -9,7 +9,8 @@ trait Configuration {
 case class SparkConfiguration(
                                input: Option[SourceConfiguration] = None,
                                actions: Seq[ActionConfiguration] = Seq.empty,
-                               output: Option[SinkConfiguration] = None
+                               output: Option[SinkConfiguration] = None,
+                               label: String = "main"
                              ) {
   val size: Int = {
     actions.size + (input match {
