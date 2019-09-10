@@ -45,4 +45,9 @@ class SparkConfigurationTest extends FlatSpec {
     assert(a("datasetA").actions.head.getUpStreams.size == 1)
     assert(a("datasetA").actions.head.getUpStreams.head == "datasetB")
   }
+
+  it should "label" in {
+    val a = Config.loadConfig("etl")
+    assert(a.head._2.label == "main")
+  }
 }
