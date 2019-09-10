@@ -1,6 +1,8 @@
 package com.power.spark.parser
 
-import com.power.spark.utils.{Config, SinkConfiguration, SourceConfiguration, SparkConfiguration}
+import com.power.core.engine.stackmachine.{CanonicalStackMachine, Operator, OperatorAdapter, StackOperator}
+import com.power.spark.utils.{Config, SinkConfiguration, SourceConfiguration, SparkConfiguration, SparkOperatorFactory}
+import org.apache.spark.sql.DataFrame
 import org.scalatest.FlatSpec
 
 class ParserTest extends FlatSpec {
@@ -12,7 +14,8 @@ class ParserTest extends FlatSpec {
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     val graph = Parser.buildGraph(a)
     assert(graph.roots.size == 2)
-    assert(graph.roots.map(_.name).equals(List("datasetA-2", "datasetB-1")))
+    assert(graph.roots.map(_.name).contains("datasetA-4"))
+    assert(graph.roots.map(_.name).contains("datasetB-1"))
     assert(graph.vertices("datasetA-1").downStreams.map(_.name).contains("datasetB-0"))
     assert(!graph.vertices("datasetA-1").downStreams.map(_.name).contains("datasetB-1"))
     assert(graph.vertices("datasetB-1").downStreams.map(_.name).contains("datasetB-0"))
@@ -23,8 +26,16 @@ class ParserTest extends FlatSpec {
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     val graph = Parser.buildGraph(a)
     val PNOrder = Parser.toPN(graph)
-    assert(PNOrder.size == 6)
+    assert(PNOrder.size == 8)
     assert(PNOrder.reverse.head.isInstanceOf[SinkConfiguration])
     assert(PNOrder.head.isInstanceOf[SourceConfiguration])
+  }
+
+  it should "etl" in {
+    val config = Config.loadConfig("etl")
+    val graph = Parser.buildGraph(config)
+    val operators = graph.toPNOrder.foldLeft(Seq[Operator[DataFrame]]())((r, c) => SparkOperatorFactory.factory(c.payLoad).get +: r).reverse
+    val branches = Map[String, Seq[StackOperator[DataFrame]]](("main", operators.map(OperatorAdapter.operator2stack)))
+    CanonicalStackMachine.execute(branches)
   }
 }

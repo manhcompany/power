@@ -57,8 +57,21 @@ class SparkOperator extends SparkOperatorFactory {
   case class SelectExprOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
     override val getNumberOfInputs: Int = 1
     override val execute: NormalOperatorType = operands => {
-      val df = operands.head.get
-      Some(df.selectExpr(config.select.get: _*))
+      operands.head.map(_.selectExpr(config.select.get: _*))
+    }
+  }
+
+  case class UnionOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1 + config.options.get.count(x => x.key == "OTHER_DATASETS")
+    override val execute: NormalOperatorType = operands => {
+      operands.tail.foldLeft(operands.head)((d, o) => d.map(x => x.union(o.get)))
+    }
+  }
+
+  case class RepartitionOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      operands.head.map(_.repartition(config.partitions.get))
     }
   }
 
@@ -67,10 +80,8 @@ class SparkOperator extends SparkOperatorFactory {
       case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])
       case "OUTPUT" => OutputOperator(config.asInstanceOf[SinkConfiguration])
       case "SELECT" => SelectExprOperator(config.asInstanceOf[ActionConfiguration])
+      case "UNION" => UnionOperator(config.asInstanceOf[ActionConfiguration])
+      case "REPARTITION" => RepartitionOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
-
-
-
-

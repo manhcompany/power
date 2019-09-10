@@ -60,7 +60,8 @@ case class SinkConfiguration(
 case class ActionConfiguration(
                                 operator: String,
                                 options: Option[Seq[Opt]],
-                                select: Option[Seq[String]]
+                                select: Option[Seq[String]],
+                                partitions: Option[Int]
                               ) extends Configuration {
   override def getUpStreams: Seq[String] = {
     options match {
