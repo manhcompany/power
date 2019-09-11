@@ -2,7 +2,7 @@ package com.power.spark.parser
 
 import com.power.core.graph.GraphContext
 import com.power.core.graph.mutable.Graph
-import com.power.spark.utils.{Configuration, SinkConfiguration, SparkConfiguration}
+import com.power.spark.utils.{ActionConfiguration, Configuration, SinkConfiguration, SparkConfiguration}
 
 object Parser {
   def buildGraph(sparkConfiguration: Map[String, SparkConfiguration]): Graph[Configuration] = {
@@ -28,6 +28,9 @@ object Parser {
     }
 
     val graph = buildGraph(sparkConfiguration)
+
+    val asTempTables = graph.filter(v => v.payLoad.isInstanceOf[ActionConfiguration]).filter(v => v.payLoad.asInstanceOf[ActionConfiguration].operator == "AS_TEMP_TABLE")
+    asTempTables.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
 
     val sinkConfigurations = graph.filter(v => v.payLoad.isInstanceOf[SinkConfiguration])
     sinkConfigurations.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
