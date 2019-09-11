@@ -72,7 +72,8 @@ class SparkOperator extends SparkOperatorFactory {
   }
 
   case class UnionOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
-    override val getNumberOfInputs: Int = 1 + config.options.get.count(x => x.key == "OTHER_DATASETS")
+    assert(config.numberOfDatasets.isDefined)
+    override val getNumberOfInputs: Int = config.numberOfDatasets.get
     override val execute: NormalOperatorType = operands => {
       operands.tail.foldLeft(operands.head)((d, o) => d.map(x => x.union(o.get)))
     }
