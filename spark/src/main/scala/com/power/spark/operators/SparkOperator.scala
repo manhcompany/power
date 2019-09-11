@@ -94,6 +94,13 @@ class SparkOperator extends SparkOperatorFactory {
     }
   }
 
+  case class SqlOperator(confg: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 0
+    override val execute: NormalOperatorType = _ => {
+      Some(SparkCommon.spark.sql(confg.sql.get))
+    }
+  }
+
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
       case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])
@@ -102,6 +109,7 @@ class SparkOperator extends SparkOperatorFactory {
       case "UNION" => UnionOperator(config.asInstanceOf[ActionConfiguration])
       case "REPARTITION" => RepartitionOperator(config.asInstanceOf[ActionConfiguration])
       case "AS_TEMP_TABLE" => AsTempTableOperator(config.asInstanceOf[ActionConfiguration])
+      case "SQL" => SqlOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }

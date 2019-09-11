@@ -69,7 +69,8 @@ case class ActionConfiguration(
                                 options: Option[Seq[Opt]],
                                 select: Option[Seq[String]],
                                 partitions: Option[Int],
-                                tableName: Option[String]
+                                tableName: Option[String],
+                                sql: Option[String]
                               ) extends Configuration {
   override def getUpStreams: Seq[String] = {
     options match {
