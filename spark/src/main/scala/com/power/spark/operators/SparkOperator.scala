@@ -114,6 +114,18 @@ class SparkOperator extends SparkOperatorFactory {
     }
   }
 
+  case class DeduplicateOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      operands.head.map(df => {
+        config.columns match {
+          case Some(cs) => df.dropDuplicates(cs)
+          case None => df.dropDuplicates()
+        }
+      })
+    }
+  }
+
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
       case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])
@@ -124,6 +136,7 @@ class SparkOperator extends SparkOperatorFactory {
       case "AS_TEMP_TABLE" => AsTempTableOperator(config.asInstanceOf[ActionConfiguration])
       case "SQL" => SqlOperator(config.asInstanceOf[ActionConfiguration])
       case "RENAME" => RenameOperator(config.asInstanceOf[ActionConfiguration])
+      case "DEDUPLICATE" => DeduplicateOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
