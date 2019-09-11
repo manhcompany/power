@@ -67,7 +67,7 @@ case class SinkConfiguration(
 case class ActionConfiguration(
                                 operator: String,
                                 options: Option[Seq[Opt]],
-                                select: Option[Seq[String]],
+                                exprs: Option[Seq[String]],
                                 partitions: Option[Int],
                                 tableName: Option[String],
                                 sql: Option[String],

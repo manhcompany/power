@@ -66,7 +66,7 @@ class SparkOperator extends SparkOperatorFactory {
   case class SelectExprOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
     override val getNumberOfInputs: Int = 1
     override val execute: NormalOperatorType = operands => {
-      operands.head.map(_.selectExpr(config.select.get: _*))
+      operands.head.map(_.selectExpr(config.exprs.get: _*))
     }
   }
 
@@ -136,6 +136,15 @@ class SparkOperator extends SparkOperatorFactory {
     }
   }
 
+  case class FilterOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      operands.head.map(df => {
+        config.exprs.get.foldLeft(df)((r, c) => r.filter(c))
+      })
+    }
+  }
+
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
       case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])
@@ -148,6 +157,7 @@ class SparkOperator extends SparkOperatorFactory {
       case "RENAME" => RenameOperator(config.asInstanceOf[ActionConfiguration])
       case "DEDUPLICATE" => DeduplicateOperator(config.asInstanceOf[ActionConfiguration])
       case "DROPNULL" => DropNullOperator(config.asInstanceOf[ActionConfiguration])
+      case "FILTER" => FilterOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
