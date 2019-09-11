@@ -91,7 +91,7 @@ class SparkOperator extends SparkOperatorFactory {
     override val execute: NormalOperatorType = operands => {
       val df = operands.head.get
       df.createOrReplaceTempView(config.tableName.get)
-      None
+      Some(df)
     }
   }
 

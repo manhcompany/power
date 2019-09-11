@@ -29,8 +29,8 @@ object Parser {
 
     val graph = buildGraph(sparkConfiguration)
 
-    val asTempTables = graph.filter(v => v.payLoad.isInstanceOf[ActionConfiguration]).filter(v => v.payLoad.asInstanceOf[ActionConfiguration].operator == "AS_TEMP_TABLE")
-    asTempTables.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
+//    val asTempTables = graph.filter(v => v.payLoad.isInstanceOf[ActionConfiguration]).filter(v => v.payLoad.asInstanceOf[ActionConfiguration].operator == "AS_TEMP_TABLE")
+//    asTempTables.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
 
     val sinkConfigurations = graph.filter(v => v.payLoad.isInstanceOf[SinkConfiguration])
     sinkConfigurations.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
