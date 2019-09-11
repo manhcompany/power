@@ -18,8 +18,8 @@ class SparkOperator extends SparkOperatorFactory {
     }
     override val execute: NormalOperatorType = operands => {
       config.load match {
-        case Some(x) => operands.head
-        case None => {
+        case Some(_) => operands.head
+        case None =>
           val spark = SparkCommon.getSparkSession()
           val readerFormat = config.format match {
             case Some(f) => spark.read.format(f)
@@ -32,7 +32,6 @@ class SparkOperator extends SparkOperatorFactory {
           }
 
           Some(readerOptions.load(config.path.get))
-        }
       }
     }
   }
@@ -102,6 +101,19 @@ class SparkOperator extends SparkOperatorFactory {
     }
   }
 
+  case class RenameOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      operands.head.map(x => {
+        config.columns.get.foldLeft(x)((r, c) => {
+          val oldCol = c.split(">>")(0).trim
+          val newCol = c.split(">>")(1).trim
+          r.withColumnRenamed(oldCol, newCol)
+        })
+      })
+    }
+  }
+
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
       case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])
@@ -111,6 +123,7 @@ class SparkOperator extends SparkOperatorFactory {
       case "REPARTITION" => RepartitionOperator(config.asInstanceOf[ActionConfiguration])
       case "AS_TEMP_TABLE" => AsTempTableOperator(config.asInstanceOf[ActionConfiguration])
       case "SQL" => SqlOperator(config.asInstanceOf[ActionConfiguration])
+      case "RENAME" => RenameOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
