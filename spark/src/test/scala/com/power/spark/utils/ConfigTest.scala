@@ -23,6 +23,6 @@ class ConfigTest extends FlatSpec {
 
   it should "loadConfig with operator" in {
     val config = Config.loadConfig("etl")
-    assert(config("datasetA").actions.head.operator == "SELECT")
+    assert(config("datasetA").actions.head.operator == "UNION")
   }
 }
