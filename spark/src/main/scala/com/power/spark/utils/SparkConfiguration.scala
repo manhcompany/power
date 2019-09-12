@@ -72,7 +72,9 @@ case class ActionConfiguration(
                                 tableName: Option[String],
                                 sql: Option[String],
                                 numberOfDatasets: Option[Int],
-                                columns: Option[Seq[String]]
+                                columns: Option[Seq[String]],
+                                joinType: Option[String] = Some("inner"),
+                                describes: Seq[DescribeConfiguration] = Seq.empty
                               ) extends Configuration {
   override def getDownStreams: Seq[String] = {
     options match {
@@ -83,5 +85,7 @@ case class ActionConfiguration(
 
   override def getOperatorName: String = operator
 }
+
+case class DescribeConfiguration(col: Option[String], summary: Seq[String])
 
 case class Opt(key: String, value: String)

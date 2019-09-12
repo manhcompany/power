@@ -34,5 +34,6 @@ class ParserTest extends FlatSpec {
     assert(PNOrder.size == 8)
     assert(PNOrder.reverse.head.isInstanceOf[SinkConfiguration])
     assert(PNOrder.head.isInstanceOf[SourceConfiguration])
+    assert(PNOrder.map(_.getOperatorName).toList.equals(List("INPUT", "INPUT", "UNION", "SELECT", "REPARTITION", "OUTPUT", "INPUT", "OUTPUT")))
   }
 }
