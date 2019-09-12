@@ -39,11 +39,11 @@ class SparkConfigurationTest extends FlatSpec {
     assert(a("datasetA").actions.head.options.get.head.value == "datasetB")
   }
 
-  it should "getUpStreams" in {
+  it should "getDownStreams" in {
     val a = Config.loadConfig("etl")
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
-    assert(a("datasetA").actions.head.getUpStreams.size == 1)
-    assert(a("datasetA").actions.head.getUpStreams.head == "datasetB")
+    assert(a("datasetA").actions.head.getDownStreams.size == 1)
+    assert(a("datasetA").actions.head.getDownStreams.head == "datasetB")
   }
 
   it should "label" in {

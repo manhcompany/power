@@ -1,7 +1,7 @@
 package com.power.spark.utils
 
 trait Configuration {
-  def getUpStreams: Seq[String] = Seq[String]()
+  def getDownStreams: Seq[String] = Seq[String]()
 
   def getOperatorName: String = "Empty"
 }
@@ -46,7 +46,7 @@ case class SparkConfiguration(
 case class SourceConfiguration(path: Option[String], format: Option[String], options: Option[Seq[Opt]], load: Option[String]) extends Configuration {
   override def getOperatorName: String = "INPUT"
 
-  override def getUpStreams: Seq[String] = {
+  override def getDownStreams: Seq[String] = {
     load match {
       case Some(x) => Seq[String](x)
       case None => Seq[String]()
@@ -67,12 +67,14 @@ case class SinkConfiguration(
 case class ActionConfiguration(
                                 operator: String,
                                 options: Option[Seq[Opt]],
-                                select: Option[Seq[String]],
+                                exprs: Option[Seq[String]],
                                 partitions: Option[Int],
                                 tableName: Option[String],
-                                sql: Option[String]
+                                sql: Option[String],
+                                numberOfDatasets: Option[Int],
+                                columns: Option[Seq[String]]
                               ) extends Configuration {
-  override def getUpStreams: Seq[String] = {
+  override def getDownStreams: Seq[String] = {
     options match {
       case Some(x) => x.filter(o => o.key == "OTHER_DATASETS").map(d => d.value)
       case None => Seq[String]()

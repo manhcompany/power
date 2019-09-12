@@ -18,8 +18,8 @@ class SparkOperator extends SparkOperatorFactory {
     }
     override val execute: NormalOperatorType = operands => {
       config.load match {
-        case Some(x) => operands.head
-        case None => {
+        case Some(_) => operands.head
+        case None =>
           val spark = SparkCommon.getSparkSession()
           val readerFormat = config.format match {
             case Some(f) => spark.read.format(f)
@@ -32,7 +32,6 @@ class SparkOperator extends SparkOperatorFactory {
           }
 
           Some(readerOptions.load(config.path.get))
-        }
       }
     }
   }
@@ -67,12 +66,13 @@ class SparkOperator extends SparkOperatorFactory {
   case class SelectExprOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
     override val getNumberOfInputs: Int = 1
     override val execute: NormalOperatorType = operands => {
-      operands.head.map(_.selectExpr(config.select.get: _*))
+      operands.head.map(_.selectExpr(config.exprs.get: _*))
     }
   }
 
   case class UnionOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
-    override val getNumberOfInputs: Int = 1 + config.options.get.count(x => x.key == "OTHER_DATASETS")
+    assert(config.numberOfDatasets.isDefined)
+    override val getNumberOfInputs: Int = config.numberOfDatasets.get
     override val execute: NormalOperatorType = operands => {
       operands.tail.foldLeft(operands.head)((d, o) => d.map(x => x.union(o.get)))
     }
@@ -90,7 +90,7 @@ class SparkOperator extends SparkOperatorFactory {
     override val execute: NormalOperatorType = operands => {
       val df = operands.head.get
       df.createOrReplaceTempView(config.tableName.get)
-      None
+      Some(df)
     }
   }
 
@@ -98,6 +98,50 @@ class SparkOperator extends SparkOperatorFactory {
     override val getNumberOfInputs: Int = 0
     override val execute: NormalOperatorType = _ => {
       Some(SparkCommon.spark.sql(confg.sql.get))
+    }
+  }
+
+  case class RenameOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      operands.head.map(x => {
+        config.columns.get.foldLeft(x)((r, c) => {
+          val oldCol = c.split(">>")(0).trim
+          val newCol = c.split(">>")(1).trim
+          r.withColumnRenamed(oldCol, newCol)
+        })
+      })
+    }
+  }
+
+  case class DeduplicateOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      operands.head.map(df => {
+        config.columns match {
+          case Some(cs) => df.dropDuplicates(cs)
+          case None => df.dropDuplicates()
+        }
+      })
+    }
+  }
+
+  case class DropNullOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      operands.head.map(df => config.columns match {
+        case Some(cs) => df.na.drop(cs.map(x => x.trim))
+        case None => df.na.drop()
+      })
+    }
+  }
+
+  case class FilterOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      operands.head.map(df => {
+        config.exprs.get.foldLeft(df)((r, c) => r.filter(c))
+      })
     }
   }
 
@@ -110,6 +154,10 @@ class SparkOperator extends SparkOperatorFactory {
       case "REPARTITION" => RepartitionOperator(config.asInstanceOf[ActionConfiguration])
       case "AS_TEMP_TABLE" => AsTempTableOperator(config.asInstanceOf[ActionConfiguration])
       case "SQL" => SqlOperator(config.asInstanceOf[ActionConfiguration])
+      case "RENAME" => RenameOperator(config.asInstanceOf[ActionConfiguration])
+      case "DEDUPLICATE" => DeduplicateOperator(config.asInstanceOf[ActionConfiguration])
+      case "DROPNULL" => DropNullOperator(config.asInstanceOf[ActionConfiguration])
+      case "FILTER" => FilterOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
