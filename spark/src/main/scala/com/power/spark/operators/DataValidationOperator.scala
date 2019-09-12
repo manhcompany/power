@@ -67,9 +67,47 @@ class DataValidationOperator extends SparkOperatorFactory {
     }
   }
 
+  /**
+    * Facet of a column in a dataset
+    * Output is dataframe
+    *
+    * +----------+--------------+--------------+-----------+------------------+-------+
+    * |time_stamp|     date_time|       dataset|column_name|               key|  value|
+    * +----------+--------------+--------------+-----------+------------------+-------+
+    * |1558349341|20190517      |      recharge|    channel|           UNKNOWN|5380052|
+    * |1558349341|20190517      |      recharge|    channel|EXTERNAL INTERFACE| 882721|
+    * |1558349341|20190517      |      recharge|    channel|               IVR|    817|
+    * |1558349341|20190517      |      recharge|    channel|            VTOPUP|5967007|
+    * |1558349341|20190517      |      recharge|    channel|      USSD GATEWAY| 388102|
+    * +----------+--------------+--------------+-----------+------------------+-------+
+    *
+    * @param configuration config
+    * @return 6-tuple dataframe: "time_stamp", "date_time", "dataset", "column_name", "key", "value"
+    */
+  case class FacetOperator(configuration: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      val timestamp: Long = System.currentTimeMillis / 1000
+      val date = configuration.options.get.filter(x => x.key.equals("date")).map(x => x.value.toString).head
+      val dataset = configuration.options.get.filter(x => x.key.equals("dataset")).map(x => x.value.toString).head
+      val result = configuration.columns.get.map(c => {
+        operands.head.get.groupBy(c).count.selectExpr(
+          s"'$timestamp' as time_stamp",
+          s"'$date' as date_time",
+          s"'$dataset' as dataset",
+          s"'facet_$c' as column_name",
+          s"$c as key",
+          "count as value"
+        )
+      }).reduce(_ union _)
+      Some(result)
+    }
+  }
+
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
       case "DESC" => DescribeOperator(config.asInstanceOf[ActionConfiguration])
+      case "FACET" => FacetOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
