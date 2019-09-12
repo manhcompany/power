@@ -5,6 +5,7 @@ import com.power.spark.utils.{ActionConfiguration, Configuration, SinkConfigurat
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.catalyst.parser.SqlBaseParser.DescribeColNameContext
 
+import scala.collection.mutable
 import scala.util.Try
 
 class DataValidationOperator extends SparkOperatorFactory {
@@ -104,10 +105,55 @@ class DataValidationOperator extends SparkOperatorFactory {
     }
   }
 
+  /**
+    * Calculate percentile of a column in a dataset
+    * Output is dataframe
+    *
+    * +----------+---------+-------+--------------+----+------------------+
+    * |time_stamp|date_time|dataset|   column_name| key|             value|
+    * +----------+---------+-------+--------------+----+------------------+
+    * |1559720860| 20190303|actress|percentile_age|0.01|             29.01|
+    * |1559720860| 20190303|actress|percentile_age|0.02|             29.02|
+    * |1559720860| 20190303|actress|percentile_age|0.03|29.029999999999998|
+    * |1559720860| 20190303|actress|percentile_age|0.04|             29.04|
+    * |1559720860| 20190303|actress|percentile_age|0.05|29.049999999999997|
+    * +----------+---------+-------+--------------+----+------------------+
+    *
+    * @param configuration config
+    * @return 6-tuple dataframe: "time_stamp", "date_time", "dataset", "column_name", "key", "value"
+    */
+  case class PercentileOperator(configuration: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      val sqlContext = SparkSession.builder().getOrCreate().sqlContext
+      import sqlContext.implicits._
+
+      val timestamp: Long = System.currentTimeMillis / 1000
+      val columns: Seq[String] = Seq("time_stamp", "date_time", "dataset", "column_name", "key", "value")
+
+      val date = configuration.options.get.filter(x => x.key.equals("date")).map(x => x.value.toString).head
+      val dataset = configuration.options.get.filter(x => x.key.equals("dataset")).map(x => x.value.toString).head
+
+      val array100 = Array.range(1, 100, 1).map(_ / 100.0)
+      val percentArray = s"array(${array100.mkString(",")})"
+      val result = configuration.columns.get.flatMap(col => {
+        val percentileValue = operands.head.get.na.drop.selectExpr(s"percentile($col, $percentArray) as percentile").first().getAs[mutable.WrappedArray[Double]](0)
+        percentileValue match {
+          case null => Array(Seq.empty[(Long, String, String, String, String, Double)].toDF(columns: _*))
+          case _ => (array100 zip percentileValue).map(x =>
+            Seq((timestamp, date, dataset, s"percentile_$col", x._1.toString, x._2)).toDF(columns: _*)
+          )
+        }
+      }).reduce(_ union _)
+      Some(result)
+    }
+  }
+
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
       case "DESC" => DescribeOperator(config.asInstanceOf[ActionConfiguration])
       case "FACET" => FacetOperator(config.asInstanceOf[ActionConfiguration])
+      case "PERCENTILE" => PercentileOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
