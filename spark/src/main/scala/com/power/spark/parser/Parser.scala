@@ -52,12 +52,11 @@ object Parser {
 
     // TODO move to Graph class
     val vertexHasMultiParents = graph.vertexHasMultiParents
-    val proxyVertices = vertexHasMultiParents.foldLeft(graph)((g, v) => {
+    vertexHasMultiParents.foldLeft(graph)((g, v) => {
       val proxyConfiguration = ActionConfiguration(operator = "PROXY", aliasName = Some(s"proxy-${v.getName}"))
       val proxyVertex = Vertex[Configuration](s"proxy-${v.getName}", ListBuffer(), ListBuffer(), proxyConfiguration)
       g.addVertex(proxyVertex)
       val upStreams = v.upStreams.clone()
-      val downStreams = v.downStreams
       val addedEdges = (proxyVertex.getName, v.getName) +: upStreams.foldLeft(Seq[(String, String)]())((edges, u) =>{
         (u.getName, proxyVertex.getName) +: edges
       })
@@ -68,7 +67,6 @@ object Parser {
       })
       removedEdges.foldLeft(g)((gg, e) => gg.removeEdge(e._1, e._2))
     })
-    graph
   }
 
   def toPN(graph: Graph[Configuration]): Seq[Configuration] = {

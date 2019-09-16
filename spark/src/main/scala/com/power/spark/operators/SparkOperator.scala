@@ -189,6 +189,7 @@ class SparkOperator extends SparkOperatorFactory {
       case "FILTER" => FilterOperator(config.asInstanceOf[ActionConfiguration])
       case "JOIN" => JoinOperator(config.asInstanceOf[ActionConfiguration])
       case "EXCEPT" => ExceptOperator(config.asInstanceOf[ActionConfiguration])
+      case "PROXY" => ProxyOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
