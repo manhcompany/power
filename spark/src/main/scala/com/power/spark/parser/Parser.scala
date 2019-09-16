@@ -47,6 +47,7 @@ object Parser {
 
     val sinkConfigurations = graph.filter(v => v.payLoad.isInstanceOf[SinkConfiguration])
     sinkConfigurations.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
+
   }
 
   def toPN(graph: Graph[Configuration]): Seq[Configuration] = {
