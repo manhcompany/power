@@ -132,4 +132,8 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
   override def iterator: Iterator[Vertex[T]] = {
     DFS().toIterator
   }
+
+  def nodeHasMultiParents: Seq[Vertex[T]] = {
+    vertices.filter(x => x._2.upStreams.size > 1).values.toList
+  }
 }
