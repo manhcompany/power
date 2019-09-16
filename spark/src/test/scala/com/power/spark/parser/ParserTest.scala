@@ -20,10 +20,10 @@ class ParserTest extends FlatSpec {
     assert(graph.vertices("datasetA-2").downStreams.head.name.equals("datasetA-1"))
     assert(graph.vertices("datasetA-3").downStreams.head.name.equals("datasetA-2"))
     assert(graph.vertices("datasetA-4").downStreams.head.name.equals("datasetA-3"))
-    assert(graph.vertices("datasetB-1").downStreams.head.name.equals("datasetB-0"))
-    assert(graph.vertices("datasetA-1").downStreams.map(_.name).contains("datasetB-0"))
+    assert(graph.vertices("datasetB-1").downStreams.head.name.equals("proxy-datasetB-0"))
+    assert(graph.vertices("datasetA-1").downStreams.map(_.name).contains("proxy-datasetB-0"))
     assert(!graph.vertices("datasetA-1").downStreams.map(_.name).contains("datasetB-1"))
-    assert(graph.vertices("datasetB-1").downStreams.map(_.name).contains("datasetB-0"))
+    assert(graph.vertices("datasetB-1").downStreams.map(_.name).contains("proxy-datasetB-0"))
   }
 
   it should "toPN" in {
@@ -31,9 +31,9 @@ class ParserTest extends FlatSpec {
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     val graph = Parser.buildGraph(a)
     val PNOrder = Parser.toPN(graph)
-    assert(PNOrder.size == 8)
+    assert(PNOrder.size == 10)
     assert(PNOrder.reverse.head.isInstanceOf[SinkConfiguration])
     assert(PNOrder.head.isInstanceOf[SourceConfiguration])
-    assert(PNOrder.map(_.getOperatorName).toList.equals(List("INPUT", "INPUT", "UNION", "SELECT", "REPARTITION", "OUTPUT", "INPUT", "OUTPUT")))
+    assert(PNOrder.map(_.getOperatorName).toList.equals(List("INPUT", "INPUT", "PROXY", "UNION", "SELECT", "REPARTITION", "OUTPUT", "INPUT", "PROXY", "OUTPUT")))
   }
 }
