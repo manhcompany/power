@@ -66,16 +66,16 @@ case class SinkConfiguration(
 
 case class ActionConfiguration(
                                 operator: String,
-                                options: Option[Seq[Opt]],
-                                exprs: Option[Seq[String]],
-                                partitions: Option[Int],
-                                tableName: Option[String],
-                                sql: Option[String],
-                                numberOfDatasets: Option[Int],
-                                columns: Option[Seq[String]],
+                                options: Option[Seq[Opt]] = None,
+                                exprs: Option[Seq[String]] = None,
+                                partitions: Option[Int] = None,
+                                tableName: Option[String] = None,
+                                sql: Option[String] = None,
+                                numberOfDatasets: Option[Int] = None,
+                                columns: Option[Seq[String]] = None,
                                 joinType: Option[String] = Some("inner"),
                                 describes: Seq[DescribeConfiguration] = Seq.empty,
-                                aliasName: Option[String]
+                                aliasName: Option[String] = None
                               ) extends Configuration {
   override def getDownStreams: Seq[String] = {
     options match {

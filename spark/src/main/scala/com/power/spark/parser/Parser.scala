@@ -1,8 +1,10 @@
 package com.power.spark.parser
 
-import com.power.core.graph.GraphContext
+import com.power.core.graph.{GraphContext, Vertex}
 import com.power.core.graph.mutable.Graph
-import com.power.spark.utils.{Configuration, SinkConfiguration, SparkConfiguration}
+import com.power.spark.utils.{ActionConfiguration, Configuration, SinkConfiguration, SparkConfiguration}
+
+import scala.collection.mutable.ListBuffer
 
 object Parser {
   def buildGraph(sparkConfiguration: Map[String, SparkConfiguration]): Graph[Configuration] = {
@@ -47,6 +49,25 @@ object Parser {
 
     val sinkConfigurations = graph.filter(v => v.payLoad.isInstanceOf[SinkConfiguration])
     sinkConfigurations.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
+
+    // TODO move to Graph class
+    val vertexHasMultiParents = graph.vertexHasMultiParents
+    val proxyVertices = vertexHasMultiParents.foldLeft(graph)((g, v) => {
+      val proxyConfiguration = ActionConfiguration(operator = "PROXY", aliasName = Some(s"proxy-${v.getName}"))
+      val proxyVertex = Vertex[Configuration](s"proxy-${v.getName}", ListBuffer(), ListBuffer(), proxyConfiguration)
+      g.addVertex(proxyVertex)
+      val upStreams = v.upStreams
+      val downStreams = v.downStreams
+      val addedEdges = (proxyVertex.getName, v.getName) +: upStreams.foldLeft(Seq[(String, String)]())((edges, u) =>{
+        (u.getName, proxyVertex.getName) +: edges
+      })
+      addedEdges.foldLeft(g)((gg, e) => gg.addEdge(e._1, e._2))
+
+      val removedEdges = upStreams.foldLeft(Seq[(String, String)]())((edges, u) => {
+        (u.getName, v.getName) +: edges
+      })
+      removedEdges.foldLeft(g)((gg, e) => gg.removeEdge(e._1, e._2))
+    })
   }
 
   def toPN(graph: Graph[Configuration]): Seq[Configuration] = {
