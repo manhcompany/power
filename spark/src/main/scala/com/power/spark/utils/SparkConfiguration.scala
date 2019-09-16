@@ -74,7 +74,8 @@ case class ActionConfiguration(
                                 numberOfDatasets: Option[Int],
                                 columns: Option[Seq[String]],
                                 joinType: Option[String] = Some("inner"),
-                                describes: Seq[DescribeConfiguration] = Seq.empty
+                                describes: Seq[DescribeConfiguration] = Seq.empty,
+                                aliasName: Option[String]
                               ) extends Configuration {
   override def getDownStreams: Seq[String] = {
     options match {
