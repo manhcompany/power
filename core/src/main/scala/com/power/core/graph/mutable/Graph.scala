@@ -74,6 +74,11 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
     this
   }
 
+  def addVertex(vertex: Vertex[T]): Graph[T] = {
+    vertices += (vertex.name -> Vertex[T](vertex.name, ListBuffer[Vertex[T]](), ListBuffer[Vertex[T]](), vertex.payLoad))
+    this
+  }
+
   def addEdge(start: String, end: String): Graph[T] = {
     vertices(start).addDownStream(vertices(end))
     vertices(end).addUpStream(vertices(start))
