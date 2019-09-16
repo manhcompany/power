@@ -161,7 +161,7 @@ class SparkOperator extends SparkOperatorFactory {
     }
   }
 
-  
+
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
       case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])

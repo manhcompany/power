@@ -3,6 +3,8 @@ package com.power.core.graph
 import com.power.core.graph.mutable.Graph
 import org.scalatest.FlatSpec
 
+import scala.collection.mutable.ListBuffer
+
 class GraphTest extends FlatSpec {
 
   behavior of "GraphTest"
@@ -117,5 +119,13 @@ class GraphTest extends FlatSpec {
     graph.build()
     assert(graph.DFS().size == 3)
     assert(graph.DFS().map(x => x.name).equals(List("b", "a", "c")))
+  }
+
+  it should "addVertex" in {
+    val graph = Graph(configs)
+    graph.build()
+    graph.addVertex(Vertex("d", ListBuffer(), ListBuffer(), 1))
+    assert(graph.vertices.size == 4)
+    assert(graph.vertices.contains("d"))
   }
 }
