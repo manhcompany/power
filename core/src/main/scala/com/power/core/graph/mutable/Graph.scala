@@ -74,6 +74,11 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
     this
   }
 
+  def addVertex(vertex: Vertex[T]): Graph[T] = {
+    vertices += (vertex.name -> Vertex[T](vertex.name, ListBuffer[Vertex[T]](), ListBuffer[Vertex[T]](), vertex.payLoad))
+    this
+  }
+
   def addEdge(start: String, end: String): Graph[T] = {
     vertices(start).addDownStream(vertices(end))
     vertices(end).addUpStream(vertices(start))
@@ -131,5 +136,9 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
 
   override def iterator: Iterator[Vertex[T]] = {
     DFS().toIterator
+  }
+
+  def vertexHasMultiParents: Seq[Vertex[T]] = {
+    vertices.filter(x => x._2.upStreams.size > 1).values.toList
   }
 }

@@ -9,6 +9,7 @@ import scala.util.Try
 
 
 class SparkOperator extends SparkOperatorFactory {
+  var aliases : Map[String, Option[DataFrame]] = Map()
   case class InputOperator(config: SourceConfiguration) extends NormalOperator[DataFrame] {
     override val getNumberOfInputs: Int = {
       config.load match {
@@ -161,6 +162,18 @@ class SparkOperator extends SparkOperatorFactory {
     }
   }
 
+  case class ProxyOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      if(aliases.contains(config.aliasName.get)) {
+        aliases(config.aliasName.get)
+      } else {
+        aliases += (config.aliasName.get -> operands.head)
+        operands.head
+      }
+    }
+  }
+
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
       case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])
@@ -176,6 +189,7 @@ class SparkOperator extends SparkOperatorFactory {
       case "FILTER" => FilterOperator(config.asInstanceOf[ActionConfiguration])
       case "JOIN" => JoinOperator(config.asInstanceOf[ActionConfiguration])
       case "EXCEPT" => ExceptOperator(config.asInstanceOf[ActionConfiguration])
+      case "PROXY" => ProxyOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }
