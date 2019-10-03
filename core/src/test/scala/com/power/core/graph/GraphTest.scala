@@ -118,4 +118,12 @@ class GraphTest extends FlatSpec {
     assert(graph.DFS().size == 3)
     assert(graph.DFS().map(x => x.name).equals(List("b", "a", "c")))
   }
+
+  it should "moveSubTreeToRoot" in {
+    val graph = Graph(configs)
+    graph.build()
+    assert(graph.roots.size == 2)
+    graph.moveSubTreeToRoot("b")
+    assert(graph.roots.size == 3)
+  }
 }

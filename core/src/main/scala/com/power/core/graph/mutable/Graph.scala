@@ -129,6 +129,12 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
     this
   }
 
+  def moveSubTreeToRoot(node: String): Graph[T] = {
+    val removedEdges = vertices(node).upStreams.foldLeft(List[(String, String)]())((r, u) => (u.name, node) :: r)
+    removedEdges.foreach(x => this.removeEdge(x._1, x._2))
+    this
+  }
+
   override def iterator: Iterator[Vertex[T]] = {
     DFS().toIterator
   }
