@@ -135,4 +135,11 @@ class GraphTest extends FlatSpec {
     graph.moveSubTreeToRoot("b")
     assert(graph.roots.size == 3)
   }
+
+  it should "toPNOrderOptimize" in {
+    val graph = Graph(configs)
+    graph.build()
+    assert(graph.roots.size == 2)
+    assert(graph.toPNOrderOptimize.length == 3)
+  }
 }

@@ -18,7 +18,7 @@ object ETL extends Logging {
     val labels = config.groupBy(x => x._2.label)
     val branches = labels.map(x => {
       val graph = Parser.buildGraph(x._2)
-      val operators = graph.toPNOrder.foldLeft(Seq[Operator[DataFrame]]())((r, c) => SparkOperatorFactory.factory(c.payLoad).get +: r).reverse
+      val operators = graph.toPNOrderOptimize.foldLeft(Seq[Operator[DataFrame]]())((r, c) => SparkOperatorFactory.factory(c.payLoad).get +: r).reverse
       (x._1, operators.map(OperatorAdapter.operator2stack))
     })
     CanonicalStackMachine.execute(branches)
