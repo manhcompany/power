@@ -2,7 +2,7 @@ package com.power.spark.utils
 
 import java.util.ServiceLoader
 
-import com.power.core.engine.stackmachine.Operator
+import com.power.core.engine.stackmachine.{Operator, ProgramMemory}
 import org.apache.spark.sql.DataFrame
 
 import scala.collection.JavaConverters._
@@ -12,6 +12,7 @@ trait SparkOperatorFactory {
 }
 
 object SparkOperatorFactory {
+  val pm = new ProgramMemory[DataFrame]()
   private val factories = ServiceLoader.load(classOf[SparkOperatorFactory]).asScala.toList.map(_.getClass).map(_.newInstance())
 
   def factory(configuration: Configuration): Option[Operator[DataFrame]] = {

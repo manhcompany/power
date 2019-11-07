@@ -64,12 +64,10 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
   def addContext(context: GraphContext[T]): Graph[T] = {
     vertices += (context.name -> Vertex[T](context.name, ListBuffer[Vertex[T]](), ListBuffer[Vertex[T]](), context.payLoad))
     context.downStreams.foreach(d => {
-      vertices(context.name).addDownStream(vertices(d))
-      vertices(d).addUpStream(vertices(context.name))
+      this.addEdge(context.name, d)
     })
     context.upStreams.foreach(u => {
-      vertices(u).addDownStream(vertices(context.name))
-      vertices(context.name).addUpStream(vertices(u))
+      this.addEdge(u, context.name)
     })
     this
   }

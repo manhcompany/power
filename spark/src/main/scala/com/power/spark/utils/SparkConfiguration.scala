@@ -89,3 +89,7 @@ case class ActionConfiguration(
 case class DescribeConfiguration(col: Option[String], summary: Seq[String])
 
 case class Opt(key: String, value: String)
+
+case class MemoryOperatorConfiguration(operator: String, name: String) extends Configuration {
+  override def getOperatorName: String = operator
+}

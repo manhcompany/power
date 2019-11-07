@@ -2,7 +2,7 @@ package com.power.spark.parser
 
 import com.power.core.graph.GraphContext
 import com.power.core.graph.mutable.Graph
-import com.power.spark.utils.{Configuration, SinkConfiguration, SparkConfiguration}
+import com.power.spark.utils.{Configuration, MemoryOperatorConfiguration, SinkConfiguration, SparkConfiguration}
 
 object Parser {
   def buildGraph(sparkConfiguration: Map[String, SparkConfiguration]): Graph[Configuration] = {
@@ -47,6 +47,21 @@ object Parser {
 
     val sinkConfigurations = graph.filter(v => v.payLoad.isInstanceOf[SinkConfiguration])
     sinkConfigurations.foldLeft(graph)((g, s) => g.moveNodeToRoot(s.name))
+
+    val overlaps = graph.filter(x => x.upStreams.size > 1)
+    overlaps.foreach(v => {
+      val variableName = (scala.util.Random.alphanumeric take 10).foldLeft("")((r, c) => s"$r$c")
+      val storeConfig = MemoryOperatorConfiguration(operator = "STORE", name = variableName)
+      val storeVertexName: String = s"${v.name}-STORE-$variableName"
+      graph.addContext(GraphContext(storeVertexName, List(), List(), storeConfig))
+      v.upStreams.foreach(u => {
+        val loadConfig = MemoryOperatorConfiguration(operator = "LOAD", name = variableName)
+        graph.addContext(GraphContext(s"${u.name}-LOAD-$variableName", List(u.name), List(storeVertexName), loadConfig))
+        graph.removeEdge(u.name, v.name)
+      })
+      graph.addEdge(storeVertexName, v.name)
+    })
+    graph
   }
 
   def toPN(graph: Graph[Configuration]): Seq[Configuration] = {

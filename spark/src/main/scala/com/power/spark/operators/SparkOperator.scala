@@ -1,6 +1,6 @@
 package com.power.spark.operators
 
-import com.power.core.engine.stackmachine.{NormalOperator, Operator}
+import com.power.core.engine.stackmachine.{NormalOperator, Operator, ProgramMemory}
 import com.power.spark.utils._
 import org.apache.spark.sql.DataFrame
 
@@ -176,6 +176,8 @@ class SparkOperator extends SparkOperatorFactory {
       case "FILTER" => FilterOperator(config.asInstanceOf[ActionConfiguration])
       case "JOIN" => JoinOperator(config.asInstanceOf[ActionConfiguration])
       case "EXCEPT" => ExceptOperator(config.asInstanceOf[ActionConfiguration])
+      case "STORE" => SparkOperatorFactory.pm StoreOperator config.asInstanceOf[MemoryOperatorConfiguration].name
+      case "LOAD" => SparkOperatorFactory.pm LoadOperator config.asInstanceOf[MemoryOperatorConfiguration].name
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 }

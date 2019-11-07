@@ -70,6 +70,15 @@ class GraphTest extends FlatSpec {
     assert(!graph.roots.map(r => r.name).contains("d"))
     assert(graph.roots.map(r => r.name).contains("c"))
     assert(!graph.roots.map(r => r.name).contains("a"))
+    assert(graph.roots.size == 1)
+
+    graph.addContext(GraphContext("e", List(), List("c", "b", "d"), 1))
+    assert(graph.roots.map(r => r.name).contains("e"))
+    assert(graph.roots.size == 1)
+    assert(!graph.hasCycle)
+
+    graph.addContext(GraphContext("f", List("b"), List("e"), 1))
+    assert(graph.hasCycle)
   }
 
   it should "addEdge" in {
