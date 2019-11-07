@@ -64,12 +64,10 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
   def addContext(context: GraphContext[T]): Graph[T] = {
     vertices += (context.name -> Vertex[T](context.name, ListBuffer[Vertex[T]](), ListBuffer[Vertex[T]](), context.payLoad))
     context.downStreams.foreach(d => {
-      vertices(context.name).addDownStream(vertices(d))
-      vertices(d).addUpStream(vertices(context.name))
+      this.addEdge(context.name, d)
     })
     context.upStreams.foreach(u => {
-      vertices(u).addDownStream(vertices(context.name))
-      vertices(context.name).addUpStream(vertices(u))
+      this.addEdge(u, context.name)
     })
     this
   }
@@ -108,12 +106,13 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
 
   def DFS(): List[Vertex[T]] = {
     def DFSRec(vertex: Vertex[T], visited: List[Vertex[T]]): List[Vertex[T]] = {
-      if(visited.contains(vertex))
+      if (visited.contains(vertex))
         visited
       else {
         vertex.downStreams.filterNot(p => visited.contains(p)).foldLeft(vertex :: visited)((r, x) => DFSRec(x, r))
       }
     }
+
     roots.foldLeft(List[Vertex[T]]())((r, root) => DFSRec(root, r).reverse)
   }
 
@@ -129,7 +128,30 @@ case class Graph[T](configs: Seq[GraphContext[T]]) extends Iterable[Vertex[T]] {
     this
   }
 
+  def moveSubTreeToRoot(node: String): Graph[T] = {
+    val removedEdges = vertices(node).upStreams.foldLeft(List[(String, String)]())((r, u) => (u.name, node) :: r)
+    removedEdges.foreach(x => this.removeEdge(x._1, x._2))
+    this
+  }
+
   override def iterator: Iterator[Vertex[T]] = {
     DFS().toIterator
+  }
+
+  def toPNOrderOptimize: Seq[Vertex[T]] = {
+    assert(!hasCycle, "Graph should not have any cycle")
+    val checked = mutable.ListBuffer[Vertex[T]]()
+
+    def toPNOrderOptimizeRec(vertex: Vertex[T]): List[Vertex[T]] = {
+      vertex :: vertex.downStreams.toList.foldLeft(List[Vertex[T]]())((r, v) => {
+        if (!checked.map(c => c.name).contains(v.name)) {
+          checked += v
+          toPNOrderOptimizeRec(v) ::: r
+        } else {
+          r
+        }
+      })
+    }
+    roots.map(r => toPNOrderOptimizeRec(r).reverse).reduce((x, y) => x ::: y)
   }
 }

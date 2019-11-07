@@ -70,6 +70,15 @@ class GraphTest extends FlatSpec {
     assert(!graph.roots.map(r => r.name).contains("d"))
     assert(graph.roots.map(r => r.name).contains("c"))
     assert(!graph.roots.map(r => r.name).contains("a"))
+    assert(graph.roots.size == 1)
+
+    graph.addContext(GraphContext("e", List(), List("c", "b", "d"), 1))
+    assert(graph.roots.map(r => r.name).contains("e"))
+    assert(graph.roots.size == 1)
+    assert(!graph.hasCycle)
+
+    graph.addContext(GraphContext("f", List("b"), List("e"), 1))
+    assert(graph.hasCycle)
   }
 
   it should "addEdge" in {
@@ -117,5 +126,20 @@ class GraphTest extends FlatSpec {
     graph.build()
     assert(graph.DFS().size == 3)
     assert(graph.DFS().map(x => x.name).equals(List("b", "a", "c")))
+  }
+
+  it should "moveSubTreeToRoot" in {
+    val graph = Graph(configs)
+    graph.build()
+    assert(graph.roots.size == 2)
+    graph.moveSubTreeToRoot("b")
+    assert(graph.roots.size == 3)
+  }
+
+  it should "toPNOrderOptimize" in {
+    val graph = Graph(configs)
+    graph.build()
+    assert(graph.roots.size == 2)
+    assert(graph.toPNOrderOptimize.length == 3)
   }
 }
