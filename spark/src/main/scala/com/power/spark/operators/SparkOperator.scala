@@ -1,6 +1,6 @@
 package com.power.spark.operators
 
-import com.power.core.engine.stackmachine.{NormalOperator, Operator, ProgramMemory}
+import com.power.core.engine.stackmachine.{NormalOperator, Operator}
 import com.power.spark.utils._
 import org.apache.spark.sql.DataFrame
 
@@ -8,6 +8,26 @@ import scala.util.Try
 
 
 class SparkOperator extends SparkOperatorFactory {
+
+  override def factory(config: Configuration): Option[Operator[DataFrame]] = {
+    Try(Some(config.getOperatorName match {
+      case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])
+      case "OUTPUT" => OutputOperator(config.asInstanceOf[SinkConfiguration])
+      case "SELECT" => SelectExprOperator(config.asInstanceOf[ActionConfiguration])
+      case "UNION" => UnionOperator(config.asInstanceOf[ActionConfiguration])
+      case "REPARTITION" => RepartitionOperator(config.asInstanceOf[ActionConfiguration])
+      case "AS_TEMP_TABLE" => AsTempTableOperator(config.asInstanceOf[ActionConfiguration])
+      case "SQL" => SqlOperator(config.asInstanceOf[ActionConfiguration])
+      case "RENAME" => RenameOperator(config.asInstanceOf[ActionConfiguration])
+      case "DEDUPLICATE" => DeduplicateOperator(config.asInstanceOf[ActionConfiguration])
+      case "DROPNULL" => DropNullOperator(config.asInstanceOf[ActionConfiguration])
+      case "FILTER" => FilterOperator(config.asInstanceOf[ActionConfiguration])
+      case "JOIN" => JoinOperator(config.asInstanceOf[ActionConfiguration])
+      case "EXCEPT" => ExceptOperator(config.asInstanceOf[ActionConfiguration])
+      case "STORE" => SparkOperatorFactory.pm StoreOperator config.asInstanceOf[MemoryOperatorConfiguration].name
+      case "LOAD" => SparkOperatorFactory.pm LoadOperator config.asInstanceOf[MemoryOperatorConfiguration].name
+    })).map(d => d).recover { case _: Throwable => None }.get
+  }
 
   case class InputOperator(config: SourceConfiguration) extends NormalOperator[DataFrame] {
     override val getNumberOfInputs: Int = {
@@ -159,25 +179,5 @@ class SparkOperator extends SparkOperatorFactory {
     override val execute: NormalOperatorType = operands => {
       operands.tail.head.map(_.except(operands.head.get))
     }
-  }
-
-  override def factory(config: Configuration): Option[Operator[DataFrame]] = {
-    Try(Some(config.getOperatorName match {
-      case "INPUT" => InputOperator(config.asInstanceOf[SourceConfiguration])
-      case "OUTPUT" => OutputOperator(config.asInstanceOf[SinkConfiguration])
-      case "SELECT" => SelectExprOperator(config.asInstanceOf[ActionConfiguration])
-      case "UNION" => UnionOperator(config.asInstanceOf[ActionConfiguration])
-      case "REPARTITION" => RepartitionOperator(config.asInstanceOf[ActionConfiguration])
-      case "AS_TEMP_TABLE" => AsTempTableOperator(config.asInstanceOf[ActionConfiguration])
-      case "SQL" => SqlOperator(config.asInstanceOf[ActionConfiguration])
-      case "RENAME" => RenameOperator(config.asInstanceOf[ActionConfiguration])
-      case "DEDUPLICATE" => DeduplicateOperator(config.asInstanceOf[ActionConfiguration])
-      case "DROPNULL" => DropNullOperator(config.asInstanceOf[ActionConfiguration])
-      case "FILTER" => FilterOperator(config.asInstanceOf[ActionConfiguration])
-      case "JOIN" => JoinOperator(config.asInstanceOf[ActionConfiguration])
-      case "EXCEPT" => ExceptOperator(config.asInstanceOf[ActionConfiguration])
-      case "STORE" => SparkOperatorFactory.pm StoreOperator config.asInstanceOf[MemoryOperatorConfiguration].name
-      case "LOAD" => SparkOperatorFactory.pm LoadOperator config.asInstanceOf[MemoryOperatorConfiguration].name
-    })).map(d => d).recover { case _: Throwable => None }.get
   }
 }

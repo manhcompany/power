@@ -1,14 +1,21 @@
 package com.power.spark.operators
 
 import com.power.core.engine.stackmachine.{NormalOperator, Operator}
-import com.power.spark.utils.{ActionConfiguration, Configuration, SinkConfiguration, SourceConfiguration, SparkOperatorFactory}
+import com.power.spark.utils.{ActionConfiguration, Configuration, SparkOperatorFactory}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.catalyst.parser.SqlBaseParser.DescribeColNameContext
 
 import scala.collection.mutable
 import scala.util.Try
 
 class DataValidationOperator extends SparkOperatorFactory {
+
+  override def factory(config: Configuration): Option[Operator[DataFrame]] = {
+    Try(Some(config.getOperatorName match {
+      case "DESC" => DescribeOperator(config.asInstanceOf[ActionConfiguration])
+      case "FACET" => FacetOperator(config.asInstanceOf[ActionConfiguration])
+      case "PERCENTILE" => PercentileOperator(config.asInstanceOf[ActionConfiguration])
+    })).map(d => d).recover { case _: Throwable => None }.get
+  }
 
   /**
     * Describe
@@ -62,7 +69,8 @@ class DataValidationOperator extends SparkOperatorFactory {
           Seq((timestamp, date, dataset, s"desc_$colName", summary,
             value)).toDF(columns: _*)
         }
-        ).reduce(_ union _)}).reduce(_ union _)
+        ).reduce(_ union _)
+      }).reduce(_ union _)
       describeResult.unpersist()
       Some(result)
     }
@@ -148,14 +156,4 @@ class DataValidationOperator extends SparkOperatorFactory {
       Some(result)
     }
   }
-
-  override def factory(config: Configuration): Option[Operator[DataFrame]] = {
-    Try(Some(config.getOperatorName match {
-      case "DESC" => DescribeOperator(config.asInstanceOf[ActionConfiguration])
-      case "FACET" => FacetOperator(config.asInstanceOf[ActionConfiguration])
-      case "PERCENTILE" => PercentileOperator(config.asInstanceOf[ActionConfiguration])
-    })).map(d => d).recover { case _: Throwable => None }.get
-  }
 }
-
-

@@ -1,6 +1,6 @@
 package com.power.spark.apps
 
-import com.power.core.engine.stackmachine.{CanonicalStackMachine, NormalOperator, Operator, OperatorAdapter, StackOperator}
+import com.power.core.engine.stackmachine.{CanonicalStackMachine, Operator, OperatorAdapter}
 import com.power.core.util.Logging
 import com.power.spark.parser.Parser
 import com.power.spark.utils.{Config, SparkOperatorFactory}
