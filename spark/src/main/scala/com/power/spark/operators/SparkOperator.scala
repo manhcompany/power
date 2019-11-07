@@ -7,8 +7,8 @@ import org.apache.spark.sql.DataFrame
 import scala.util.Try
 
 
-
 class SparkOperator extends SparkOperatorFactory {
+
   case class InputOperator(config: SourceConfiguration) extends NormalOperator[DataFrame] {
     override val getNumberOfInputs: Int = {
       config.load match {

@@ -67,4 +67,8 @@ object Parser {
   def toPN(graph: Graph[Configuration]): Seq[Configuration] = {
     graph.toPNOrder.map(_.payLoad)
   }
+
+  def toOptimizedPN(graph: Graph[Configuration]): Seq[Configuration] = {
+    graph.toPNOrderOptimize.map(_.payLoad)
+  }
 }
