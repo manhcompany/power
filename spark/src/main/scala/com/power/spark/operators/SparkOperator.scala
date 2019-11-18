@@ -26,7 +26,15 @@ class SparkOperator extends SparkOperatorFactory {
       case "EXCEPT" => ExceptOperator(config.asInstanceOf[ActionConfiguration])
       case "STORE" => SparkOperatorFactory.pm StoreOperator config.asInstanceOf[MemoryOperatorConfiguration].name
       case "LOAD" => SparkOperatorFactory.pm LoadOperator config.asInstanceOf[MemoryOperatorConfiguration].name
+      case "FLATTEN" => FlattenOperator(config.asInstanceOf[ActionConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
+  }
+
+  case class FlattenOperator(config: ActionConfiguration) extends NormalOperator[DataFrame] {
+    override val getNumberOfInputs: Int = 1
+    override val execute: NormalOperatorType = operands => {
+      Some(config.columns.get.map(x => operands.head.map(d => d.selectExpr(x))).map(_.get).reduce(_ union _))
+    }
   }
 
   case class InputOperator(config: SourceConfiguration) extends NormalOperator[DataFrame] {
