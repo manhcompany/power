@@ -1,5 +1,6 @@
 package com.power.spark.utils
 
+import org.apache.spark.sql.types.StringType
 import org.scalatest.FlatSpec
 
 class SparkConfigurationTest extends FlatSpec {
@@ -48,6 +49,7 @@ class SparkConfigurationTest extends FlatSpec {
 
   it should "label" in {
     val a = Config.loadConfig("etl")
+    StringType
     assert(a.head._2.label == "main")
   }
 }
