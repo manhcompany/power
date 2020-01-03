@@ -59,7 +59,11 @@ case class SinkConfiguration(
                               format: Option[String],
                               options: Option[Seq[Opt]],
                               mode: Option[String],
-                              partitionBy: Option[List[String]]
+                              partitionBy: Option[List[String]],
+                              username: Option[String],
+                              password: Option[String],
+                              url: Option[String],
+                              table: Option[String]
                             ) extends Configuration {
   override def getOperatorName: String = "OUTPUT"
 }

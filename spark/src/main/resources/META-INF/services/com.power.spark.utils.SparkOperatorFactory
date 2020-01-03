@@ -1,2 +1,3 @@
 com.power.spark.operators.SparkOperator
 com.power.spark.operators.DataValidationOperator
+com.power.spark.operators.JdbcOperator
