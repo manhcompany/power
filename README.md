@@ -1,6 +1,6 @@
 # Framework for Apache Spark
 
 
-[![Actions Status](https://github.com/manhdoi/power/workflows/Scala%CI/badge.svg)](https://github.com/manhdoi/power/actions)
+[![Actions Status](https://github.com/manhcompany/power/workflows/ScalaBuild/badge.svg)](https://github.com/manhcompany/power/actions)
 
 You can code spark via config.
