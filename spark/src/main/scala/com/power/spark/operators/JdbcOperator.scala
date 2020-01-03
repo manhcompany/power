@@ -11,7 +11,7 @@ import scala.util.Try
 class JdbcOperator extends SparkOperatorFactory {
   override def factory(config: Configuration): Option[Operator[DataFrame]] = {
     Try(Some(config.getOperatorName match {
-      case "OUTPUT" => JdbcWriteOperator(config.asInstanceOf[SinkConfiguration])
+      case "JDBC-OUTPUT" => JdbcWriteOperator(config.asInstanceOf[SinkConfiguration])
     })).map(d => d).recover { case _: Throwable => None }.get
   }
 
