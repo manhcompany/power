@@ -3,7 +3,6 @@ package com.power.core.engine.stackmachine
 import org.scalatest.{BeforeAndAfterEach, FlatSpec}
 
 import scala.collection.mutable
-
 import OperatorAdapter.branch2stack
 import OperatorAdapter.normal2stack
 
@@ -123,5 +122,21 @@ class CanonicalStackMachineTest extends FlatSpec with BeforeAndAfterEach {
     val left = Seq[StackOperator[Int]](IntOperand(2), IntOperand(4), Add(), PrintOperand())
     val branches = Map[String, Seq[StackOperator[Int]]](("main", operators), ("left", left))
     CanonicalStackMachine.execute(branches)
+  }
+
+  it should "convert operator to stack operator" in {
+    val operator = IntOperand(5)
+    val stackOperator = OperatorAdapter.operator2stack(operator)
+    assert(stackOperator.isInstanceOf[StackOperator[Int]])
+
+    val addOperator = Add()
+    val addStackOperator = OperatorAdapter.operator2stack(addOperator)
+    assert(addStackOperator.isInstanceOf[StackOperator[Int]])
+    assert((addStackOperator.execute(Seq(Some(5), Some(2)))) == Right(Right(Some(7))))
+
+    val checkZeroOperator = CheckGreaterThanZero()
+    val checkZeroStackOperator = OperatorAdapter.operator2stack(checkZeroOperator)
+    assert(checkZeroStackOperator.isInstanceOf[StackOperator[Int]])
+    assert(checkZeroStackOperator.execute(Seq(Some(0))) == Right(Right(Some(0))))
   }
 }
