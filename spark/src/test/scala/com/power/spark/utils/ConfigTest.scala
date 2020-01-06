@@ -7,7 +7,7 @@ class ConfigTest extends FlatSpec {
   behavior of "ConfigTest"
 
   it should "loadConfig" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test", Some("conf/application.conf"))
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
 
     assert(a("datasetA").isInstanceOf[SparkConfiguration])
@@ -22,7 +22,7 @@ class ConfigTest extends FlatSpec {
   }
 
   it should "loadConfig with operator" in {
-    val config = Config.loadConfig("etl")
+    val config = Config.loadConfig("test", Some("conf/application.conf"))
     assert(config("datasetA").actions.head.operator == "UNION")
   }
 }

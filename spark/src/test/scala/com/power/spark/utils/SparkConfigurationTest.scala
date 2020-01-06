@@ -11,7 +11,7 @@ class SparkConfigurationTest extends FlatSpec {
   }
 
   it should "size" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test", Some("conf/application.conf"))
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     assert(a("datasetA").size == 5)
     assert(a("datasetB").size == 2)
@@ -19,13 +19,13 @@ class SparkConfigurationTest extends FlatSpec {
   }
 
   it should "tail" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test", Some("conf/application.conf"))
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     assert(a("datasetA").tail.isInstanceOf[SinkConfiguration])
   }
 
   it should "toList" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test", Some("conf/application.conf"))
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     assert(a("datasetA").toList.head._1 == "0")
     assert(a("datasetA").toList.size == 5)
@@ -34,21 +34,21 @@ class SparkConfigurationTest extends FlatSpec {
   }
 
   it should "options" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test", Some("conf/application.conf"))
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     assert(a("datasetA").actions.head.options.get.head.key == "OTHER_DATASETS")
     assert(a("datasetA").actions.head.options.get.head.value == "datasetB")
   }
 
   it should "getDownStreams" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test", Some("conf/application.conf"))
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     assert(a("datasetA").actions.head.getDownStreams.size == 1)
     assert(a("datasetA").actions.head.getDownStreams.head == "datasetB")
   }
 
   it should "label" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test", Some("conf/application.conf"))
     StringType
     assert(a.head._2.label == "main")
   }

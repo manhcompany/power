@@ -10,7 +10,7 @@ class ParserTest extends FlatSpec {
   behavior of "ParserTest"
 
   it should "buildConfiguration" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test" ,Some("conf/application.conf"))
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     val graph = Parser.buildGraph(a)
     assert(graph.roots.size == 2)
@@ -24,7 +24,7 @@ class ParserTest extends FlatSpec {
   }
 
   it should "toPN" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test", Some("conf/application.conf"))
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     val graph = Parser.buildGraph(a)
     val PNOrder = Parser.toPN(graph)
@@ -36,7 +36,7 @@ class ParserTest extends FlatSpec {
   }
 
   it should "toOptimizedPN" in {
-    val a = Config.loadConfig("etl")
+    val a = Config.loadConfig("test", Some("conf/application.conf"))
     assert(a.isInstanceOf[Map[String, SparkConfiguration]])
     val graph = Parser.buildGraph(a)
     val PNOrder = Parser.toOptimizedPN(graph)
