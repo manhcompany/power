@@ -4,9 +4,9 @@ import org.scalatest.FlatSpec
 
 class ETLTest extends FlatSpec {
 
-  behavior of "ETLTest"
-
-  it should "execute" in {
+//  behavior of "ETLTest"
+//
+//  it should "execute" in {
 //    ETL.execute()
-  }
+//  }
 }
