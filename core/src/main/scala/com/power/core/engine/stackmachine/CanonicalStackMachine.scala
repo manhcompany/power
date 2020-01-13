@@ -22,7 +22,7 @@ object CanonicalStackMachine extends AbstractStackMachine with Logging {
       op.execute(operands) match {
         case Right(optionDataFrames) => optionDataFrames match {
           case Right(dfs) => dfs match {
-            case Some(df) => s.push(Some(df))
+            case Some(dfs) => dfs.foldLeft(s)((ss, df) => ss.push(Some(df)))
             case None => s
           }
           case Left(_) => s.push(None)

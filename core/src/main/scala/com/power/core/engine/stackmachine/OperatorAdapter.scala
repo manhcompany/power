@@ -14,7 +14,7 @@ object OperatorAdapter {
       override val getNumberOfInputs: Int = normalOperator.getNumberOfInputs
       override val execute: ExecuteType = operands => {
         val result = normalOperator.execute(operands)
-        Right(Right(result))
+        Right(Right(result.map(x => Seq(x))))
       }
     }
   }
@@ -41,7 +41,7 @@ object OperatorAdapter {
         operator match {
           case value: NormalOperator[T] =>
             val result = value.execute(operands)
-            Right(Right(result))
+            Right(Right(result.map(x => Seq(x))))
           case value: BranchingOperator[T] =>
             value.execute(operands)
         }
