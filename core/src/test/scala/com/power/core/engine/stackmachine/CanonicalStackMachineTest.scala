@@ -59,7 +59,7 @@ class CanonicalStackMachineTest extends FlatSpec with BeforeAndAfterEach {
 
     override val execute: BranchOperatorType = operands => {
       val a = operands.head
-      if(a.get > 0) Right(Left(None)) else Right(Right(a))
+      if(a.get > 0) Right(Left(None)) else Right(Right(a.map(x => Seq(x))))
     }
   }
 
@@ -68,7 +68,7 @@ class CanonicalStackMachineTest extends FlatSpec with BeforeAndAfterEach {
 
     override val execute: ExecuteType = operands => {
       val a = operands.head
-      if(a.get < 0) Right(Left(None)) else Right(Right(a))
+      if(a.get < 0) Right(Left(None)) else Right(Right(a.map(x => Seq(x))))
     }
   }
 
@@ -124,6 +124,14 @@ class CanonicalStackMachineTest extends FlatSpec with BeforeAndAfterEach {
     CanonicalStackMachine.execute(branches)
   }
 
+  it should "execute with one way branching main" in {
+    val operators = Seq[StackOperator[Int]](IntOperand(3), IntOperand(2), Add(), IntOperand(3), IntOperand(4), Add(), IntOperand(8), Minus(), CheckGreaterThanZero(), BranchOperator("left"), IntOperand(30), IntOperand(4), Add(), PrintOperand())
+    val left = Seq[StackOperator[Int]](IntOperand(2), IntOperand(4), Add(), PrintOperand())
+    val branches = Map[String, Seq[StackOperator[Int]]](("main", operators), ("left", left))
+    val stack = CanonicalStackMachine.execute(branches)
+    println(stack)
+  }
+
   it should "convert operator to stack operator" in {
     val operator = IntOperand(5)
     val stackOperator = OperatorAdapter.operator2stack(operator)
@@ -132,11 +140,11 @@ class CanonicalStackMachineTest extends FlatSpec with BeforeAndAfterEach {
     val addOperator = Add()
     val addStackOperator = OperatorAdapter.operator2stack(addOperator)
     assert(addStackOperator.isInstanceOf[StackOperator[Int]])
-    assert((addStackOperator.execute(Seq(Some(5), Some(2)))) == Right(Right(Some(7))))
+    assert((addStackOperator.execute(Seq(Some(5), Some(2)))) == Right(Right(Some(Seq(7)))))
 
     val checkZeroOperator = CheckGreaterThanZero()
     val checkZeroStackOperator = OperatorAdapter.operator2stack(checkZeroOperator)
     assert(checkZeroStackOperator.isInstanceOf[StackOperator[Int]])
-    assert(checkZeroStackOperator.execute(Seq(Some(0))) == Right(Right(Some(0))))
+    assert(checkZeroStackOperator.execute(Seq(Some(0))) == Right(Right(Some(Seq(0)))))
   }
 }
