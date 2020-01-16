@@ -1,10 +1,5 @@
 package com.power.spark.utils
 
-trait Configuration {
-  def getDownStreams: Seq[String] = Seq[String]()
-
-  def getOperatorName: String = "Empty"
-}
 
 case class SparkConfiguration(
                                input: Option[SourceConfiguration] = None,
@@ -43,57 +38,3 @@ case class SparkConfiguration(
   }
 }
 
-case class SourceConfiguration(path: Option[String], format: Option[String], options: Option[Seq[Opt]], load: Option[String]) extends Configuration {
-  override def getOperatorName: String = "INPUT"
-
-  override def getDownStreams: Seq[String] = {
-    load match {
-      case Some(x) => Seq[String](x)
-      case None => Seq[String]()
-    }
-  }
-}
-
-case class SinkConfiguration(
-                              path: Option[String],
-                              format: Option[String],
-                              options: Option[Seq[Opt]],
-                              mode: Option[String],
-                              partitionBy: Option[List[String]],
-                              username: Option[String],
-                              password: Option[String],
-                              url: Option[String],
-                              table: Option[String]
-                            ) extends Configuration {
-  override def getOperatorName: String = "OUTPUT"
-}
-
-case class ActionConfiguration(
-                                operator: String,
-                                options: Option[Seq[Opt]],
-                                exprs: Option[Seq[String]],
-                                partitions: Option[Int],
-                                tableName: Option[String],
-                                sql: Option[String],
-                                numberOfDatasets: Option[Int],
-                                columns: Option[Seq[String]],
-                                joinType: Option[String] = Some("inner"),
-                                describes: Seq[DescribeConfiguration] = Seq.empty
-                              ) extends Configuration {
-  override def getDownStreams: Seq[String] = {
-    options match {
-      case Some(x) => x.filter(o => o.key == "OTHER_DATASETS").map(d => d.value)
-      case None => Seq[String]()
-    }
-  }
-
-  override def getOperatorName: String = operator
-}
-
-case class DescribeConfiguration(col: Option[String], summary: Seq[String])
-
-case class Opt(key: String, value: String)
-
-case class MemoryOperatorConfiguration(operator: String, name: String) extends Configuration {
-  override def getOperatorName: String = operator
-}
