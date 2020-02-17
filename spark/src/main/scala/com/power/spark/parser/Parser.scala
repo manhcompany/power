@@ -7,6 +7,12 @@ import com.power.spark.utils.{Configuration, MemoryOperatorConfiguration, SinkCo
 object Parser {
   def buildGraph(sparkConfiguration: Map[String, SparkConfiguration]): Graph[Configuration] = {
 
+    /**
+     * Build down streams for a SparkConfiguration dataset.
+     * @param prefix name of SparkConfiguration config
+     * @param configurations list of tuples. Each tuple contains index and element
+     * @return List of GraphContext
+     */
     def buildDownStreams(prefix: String, configurations: Seq[(String, Configuration)]): List[GraphContext[Configuration]] = {
       (
         configurations.reverse.tails.filter(x => x.size > 1).map(x => GraphContext(s"$prefix-${x.head._1}", List(), List(s"$prefix-${x.tail.head._1}"), x.head._2)) ++
@@ -14,6 +20,11 @@ object Parser {
       ).toList
     }
 
+    /**
+     * Build Graph from a map of SparkConfiguration
+     * @param sparkConfiguration map of SparkConfiguration
+     * @return Graph
+     */
     def buildGraph(sparkConfiguration: Map[String, SparkConfiguration]): Graph[Configuration] = {
       def buildDatasets(): Graph[Configuration] = {
         val context = sparkConfiguration.foldLeft(List[GraphContext[Configuration]]())((r, x) =>{
