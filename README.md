@@ -5,8 +5,8 @@
 
 You can code spark via config.
 
-TEST
-
-TEST
-
-TEST
+## Build
+```shell script
+sbt clean compile assembly 
+sbt universal:packageZipTarball
+```
