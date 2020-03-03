@@ -3,6 +3,7 @@ package com.power.core.hocon
 import com.power.core.util.HoconSerialize
 import com.typesafe.config._
 import org.scalatest.FlatSpec
+import com.typesafe.config.ConfigFactory
 
 case class Pet(name: String, age: Int) extends HoconSerialize
 
@@ -29,5 +30,55 @@ class HoconSerializeTest extends FlatSpec {
       .withValue("root", person.toHocon)
 
     dump(config)
+  }
+
+  it should "load config" in {
+    val config = ConfigFactory.load("conf/hocon-serialize.conf")
+    val person = pureconfig.loadConfigOrThrow[Person](conf = config, "root")
+    println(person)
+    assert(person.isInstanceOf[Person])
+    assert(person.age == 19)
+  }
+
+  it should "regex test" in {
+    val substitutionPattern = """[$][{]?[a-zA-Z]+[a-zA-Z0-9.]*[}]?""".r
+    println(substitutionPattern)
+    val substitutions = substitutionPattern.findAllIn(
+      """
+        |v.age = 19
+        |root {
+        |    age=${v.age}
+        |    list=[
+        |        a,
+        |        b,
+        |        c
+        |    ]
+        |    name=${v.age}
+        |    pets=[
+        |        {
+        |            age=2
+        |            name=mimi
+        |        },
+        |        {
+        |            age=1
+        |            name=milu
+        |        }
+        |    ]
+        |    properties {
+        |        car {
+        |            value=50000.0
+        |        }
+        |        house {
+        |            value=1000000.0
+        |        }
+        |    }
+        |    works {
+        |        a=b
+        |        b=c
+        |    }
+        |}
+        |""".stripMargin).foldLeft(List[String]())((l, x) => if(!l.contains(x)) { l :+ x } else { l } )
+    assert(substitutions.size == 1)
+    assert(substitutions.head.equals("${v.age}"))
   }
 }
